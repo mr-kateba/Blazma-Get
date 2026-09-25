@@ -1,5 +1,6 @@
 package xdm.app.ui.components
 
+import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatClientProperties
 import xdm.app.AppContext
 import xdm.app.DbRecord
@@ -205,7 +206,7 @@ class MainListViewRow(
                 background = UIManager.getColor("Table.background")
             }
         }
-        panDetails.border = EmptyBorder(0, 0, 0, 10)
+        panDetails.border = EmptyBorder(UiLocale.mirrored(0, 0, 0, 10))
         prg = JProgressBar()
         prg.preferredSize = Dimension(60, 10)
         prg.alignmentY = Component.TOP_ALIGNMENT
@@ -217,7 +218,7 @@ class MainListViewRow(
         p1.add(panDetails)
         prg.border = EmptyBorder(0, 0, 5, 0)
 
-        val buttonContainer = Box.createHorizontalBox()
+        val buttonContainer = Box(BoxLayout.LINE_AXIS)
         buttonContainer.border = EmptyBorder(10, 0, 10, 0)
 
         btnPause =
@@ -281,14 +282,14 @@ class MainListViewRow(
         buttonContainer.add(btnMenu)
 
         // buttonContainer.add(Box.createRigidArea(new Dimension(5, 10)));
-        p1.add(buttonContainer, BorderLayout.EAST)
+        p1.add(buttonContainer, BorderLayout.LINE_END)
         p1.add(panDetails)
         p1.isOpaque = false
         p4.isOpaque = false
 
-        panel.add(p4, BorderLayout.WEST)
+        panel.add(p4, BorderLayout.LINE_START)
         panel.add(content)
-        panel.add(p1, BorderLayout.EAST)
+        panel.add(p1, BorderLayout.LINE_END)
         panel.border = EmptyBorder(0, 5, 5, 5)
 
         this.buttonContainer = buttonContainer
@@ -326,7 +327,7 @@ class MainListViewRow(
             text.append(" (").append(formatSize(ent.speed.toDouble())).append("/s)")
         }
         if (ent.eta > 0 && ent.status == RecordStatus.DOWNLOADING) {
-            text.append(gap).append(toLongEta(ent.eta)).append(" left")
+            text.append(gap).append(xdm.app.I8N.text("LBL_TIME_LEFT").format(toLongEta(ent.eta)))
         }
         return text.toString()
     }

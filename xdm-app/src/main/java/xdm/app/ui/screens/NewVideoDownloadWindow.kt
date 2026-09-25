@@ -56,10 +56,10 @@ class NewVideoDownloadWindow : JDialog() {
         }
 
         val lblFile = JLabel(text("ND_FILE")).apply {
-            horizontalAlignment = SwingConstants.RIGHT
+            horizontalAlignment = SwingConstants.TRAILING
         }
         val gbcLblFile = GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(15, 20, 5, 10)
             gridx = 0
             gridy = 1
@@ -98,10 +98,10 @@ class NewVideoDownloadWindow : JDialog() {
         contentPane.add(lblFileInfo, gbcLblFileInfo)
 
         val lblSaveIn = JLabel(text("LBL_SAVE_IN")).apply {
-            horizontalAlignment = SwingConstants.RIGHT
+            horizontalAlignment = SwingConstants.TRAILING
         }
         val gbcLblSaveIn = GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(5, 20, 5, 10)
             gridx = 0
             gridy = 2
@@ -157,7 +157,7 @@ class NewVideoDownloadWindow : JDialog() {
         val gbcLblIgnore = GridBagConstraints().apply {
             weighty = 1.0
             fill = GridBagConstraints.VERTICAL
-            anchor = GridBagConstraints.NORTHWEST
+            anchor = GridBagConstraints.FIRST_LINE_START
             gridwidth = 4
             insets = Insets(10, 0, 5, 5)
             gridx = 1
@@ -175,7 +175,7 @@ class NewVideoDownloadWindow : JDialog() {
             gridy = 4
         }
         contentPane.add(panel, gcPanel)
-        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
+        panel.layout = BoxLayout(panel, BoxLayout.LINE_AXIS)
 
 //        val btnQueue = JButton(text("ND_QUEUE"))
 //        panel.add(btnQueue)

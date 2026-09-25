@@ -61,9 +61,9 @@ class NewDownloadWindow : JDialog() {
         //contentPane.background = UIManager.getColor("Table.background")
 
         lbAddress = JLabel(text("ND_ADDRESS"))
-        lbAddress.horizontalAlignment = SwingConstants.RIGHT
+        lbAddress.horizontalAlignment = SwingConstants.TRAILING
         val gbcLbAddress = GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(15, 20, 5, 10)
             gridx = 0
             gridy = 0
@@ -82,9 +82,9 @@ class NewDownloadWindow : JDialog() {
         txtUrl.columns = 30
 
         val lblFile = JLabel(text("ND_FILE"))
-        lblFile.horizontalAlignment = SwingConstants.RIGHT
+        lblFile.horizontalAlignment = SwingConstants.TRAILING
         val gbcLblFile = GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(5, 20, 5, 10)
             gridx = 0
             gridy = 1
@@ -124,9 +124,9 @@ class NewDownloadWindow : JDialog() {
         contentPane.add(lblFileInfo, gbcLblFileInfo)
 
         val lblSaveIn = JLabel(text("LBL_SAVE_IN"))
-        lblSaveIn.horizontalAlignment = SwingConstants.RIGHT
+        lblSaveIn.horizontalAlignment = SwingConstants.TRAILING
         val gbcLblSaveIn = GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(5, 20, 5, 10)
             gridx = 0
             gridy = 2
@@ -161,7 +161,7 @@ class NewDownloadWindow : JDialog() {
         val gbcLblIgnore = GridBagConstraints().apply {
             weighty = 1.0
             fill = GridBagConstraints.VERTICAL
-            anchor = GridBagConstraints.NORTHWEST
+            anchor = GridBagConstraints.FIRST_LINE_START
             gridwidth = 4
             insets = Insets(5, 0, 5, 5)
             gridx = 1
@@ -180,7 +180,7 @@ class NewDownloadWindow : JDialog() {
             gridy = 4
         }
         contentPane.add(panel, gcPanel)
-        panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
+        panel.layout = BoxLayout(panel, BoxLayout.LINE_AXIS)
 
         btnIgnore = JButton(text("MSG_IGNORE_ADDR"))
         btnIgnore.addActionListener { ignoreHost() }

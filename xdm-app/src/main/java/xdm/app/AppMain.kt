@@ -1,5 +1,6 @@
 package xdm.app
 
+import com.formdev.flatlaf.FlatLaf
 import com.formdev.flatlaf.themes.FlatMacDarkLaf
 import com.formdev.flatlaf.themes.FlatMacLightLaf
 import org.conscrypt.Conscrypt
@@ -29,7 +30,7 @@ object AppMain {
     @JvmStatic
     fun main(args: Array<String>) {
         val homeDir = System.getProperty("user.home")
-        val configDir = "$homeDir${File.separatorChar}.xdm-app"
+        val configDir = "$homeDir${File.separatorChar}$CONFIG_DIR"
         val tempDir = "$configDir${File.separatorChar}tmp"
 
         File(configDir).mkdirs()
@@ -43,7 +44,7 @@ object AppMain {
 
         System.setProperty("apple.awt.application.appearance", "system")
         System.setProperty("apple.laf.useScreenMenuBar", "true")
-        System.setProperty("apple.awt.application.name", "XDM")
+        System.setProperty("apple.awt.application.name", APP_NAME)
         System.setProperty("apple.awt.enableTemplateImages", "true")
 
         Logger.info("Creating dir: $tempDir")
@@ -106,11 +107,20 @@ object AppMain {
      * before any Swing UI is created (i.e. before [AppInstance.run]).
      */
     @JvmStatic
-    fun setupTheme(theme: String) {
-        when (theme.lowercase()) {
-            "light" -> FlatMacLightLaf.setup()
-            else -> FlatMacDarkLaf.setup()
-        }
+    fun setupTheme(theme: String, lang: String = "en") {
+        val dark = theme.lowercase() != "light"
+        // Blazma brand: the orange accent of the Blazma store, on a slightly warm dark background.
+        FlatLaf.setGlobalExtraDefaults(
+            if (dark) mapOf(
+                "@accentColor" to "#FF6D00",
+                "@background" to "#1C1C22",
+                "@foreground" to "#EDEDF0",
+            ) else mapOf(
+                "@accentColor" to "#E65100",
+            )
+        )
+        UiLocale.registerFont(lang)?.let { FlatLaf.setPreferredFontFamily(it) }
+        if (dark) FlatMacDarkLaf.setup() else FlatMacLightLaf.setup()
         UIManager.put("TableHeader.cellMargins", Insets(0, 10, 0, 0))
         UIManager.put("SplitPaneDivider.gripDotCount", 0)
         UIManager.put("SplitPane.dividerSize", 10)

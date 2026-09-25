@@ -1,5 +1,6 @@
 package xdm.app.ui.components
 
+import xdm.app.I8N
 import xdm.app.MessageBoxResult
 import java.awt.Window
 import javax.swing.JCheckBox
@@ -44,12 +45,12 @@ object MessageBox {
     fun showAuth(title: String, message: String, rememberOption: Boolean): AuthInput? {
         val usernameField = JTextField()
         val passwordField = JPasswordField()
-        val rememberMeCheckBox = JCheckBox("Remember me")
+        val rememberMeCheckBox = JCheckBox(I8N.text("MSG_REMEMBER_ME"))
 
         val components = mutableListOf<Any>(
             message,
-            "Username:", usernameField,
-            "Password:", passwordField
+            I8N.text("DESC_USER"), usernameField,
+            I8N.text("DESC_PASS"), passwordField
         )
 
         if (rememberOption) {

@@ -87,7 +87,7 @@ class CategoryEditDialog(parent: Window, private val existing: DownloadCategory?
         })
 
         val form = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
             border = EmptyBorder(14, 14, 10, 14)
             add(field(I8N.text("CAT_NAME"), txtName, null))
             add(Box.createRigidArea(Dimension(0, 10)))
@@ -111,7 +111,7 @@ class CategoryEditDialog(parent: Window, private val existing: DownloadCategory?
         val btnCancel = settingsButton(I8N.text("ND_CANCEL")) { dispose() }
         rootPane.defaultButton = btnOk
 
-        val buttons = Box.createHorizontalBox().apply {
+        val buttons = Box(BoxLayout.LINE_AXIS).apply {
             add(Box.createHorizontalGlue())
             add(btnOk)
             add(Box.createRigidArea(Dimension(10, 10)))
@@ -134,7 +134,7 @@ class CategoryEditDialog(parent: Window, private val existing: DownloadCategory?
 
     private fun field(label: String, input: JTextField, hint: String?): JPanel = JPanel().apply {
         isOpaque = false
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
         alignmentX = Component.LEFT_ALIGNMENT
         maximumSize = Dimension(Int.MAX_VALUE, if (hint == null) 48 else 66)
         add(JLabel(label).apply { alignmentX = Component.LEFT_ALIGNMENT })

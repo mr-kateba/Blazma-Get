@@ -57,13 +57,13 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
         val btnClose = JButton(text("LBL_CLOSE")).apply {
             addActionListener { dispose() }
         }
-        val buttonPanel = JPanel(FlowLayout(FlowLayout.RIGHT, 0, 0)).apply {
+        val buttonPanel = JPanel(FlowLayout(FlowLayout.TRAILING, 0, 0)).apply {
             add(btnClose)
         }
         val gc = GridBagConstraints().apply {
             gridx = 0; gridy = row
             gridwidth = 2
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             fill = GridBagConstraints.HORIZONTAL
             weightx = 1.0
             insets = Insets(16, 6, 0, 6)
@@ -82,7 +82,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
         }
         val gcLabel = GridBagConstraints().apply {
             gridx = 0; gridy = row
-            anchor = GridBagConstraints.NORTHWEST
+            anchor = GridBagConstraints.FIRST_LINE_START
             insets = Insets(6, 6, 6, 12)
         }
         panel.add(lbl, gcLabel)
@@ -101,7 +101,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
             JPanel(BorderLayout(6, 0)).apply {
                 isOpaque = false
                 add(field, BorderLayout.CENTER)
-                add(copyBtn, BorderLayout.EAST)
+                add(copyBtn, BorderLayout.LINE_END)
             }
         } else {
             JLabel(value)
@@ -109,7 +109,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
 
         val gcValue = GridBagConstraints().apply {
             gridx = 1; gridy = row
-            anchor = GridBagConstraints.WEST
+            anchor = GridBagConstraints.LINE_START
             fill = GridBagConstraints.HORIZONTAL
             weightx = 1.0
             insets = Insets(6, 0, 6, 6)

@@ -90,7 +90,7 @@ internal fun settingsSectionLabel(text: String): JLabel = JLabel(text.uppercase(
  * grouped rows rather than a stack of boxed headings.
  */
 internal fun settingsSection(title: String, vararg rows: JComponent): JComponent {
-    val box = Box.createVerticalBox().apply { alignmentX = Component.LEFT_ALIGNMENT }
+    val box = Box(BoxLayout.PAGE_AXIS).apply { alignmentX = Component.LEFT_ALIGNMENT }
     box.add(settingsSectionLabel(title))
     box.add(settingsCard(*rows))
     // A vertical Box takes the tallest child's maximum, which is unbounded for the card.
@@ -101,7 +101,7 @@ internal fun settingsSection(title: String, vararg rows: JComponent): JComponent
 /** The rounded card on its own, without a caption. */
 internal fun settingsCard(vararg rows: JComponent): JComponent {
     val panel = SettingsCard()
-    panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+    panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
     panel.border = EmptyBorder(2, 18, 2, 18)
     rows.forEachIndexed { i, row ->
         row.alignmentX = Component.LEFT_ALIGNMENT
@@ -144,7 +144,7 @@ internal fun settingsFullRow(title: String?, subtitle: String?, content: JCompon
 private class FullRow : JPanel() {
     init {
         isOpaque = false
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
         alignmentX = Component.LEFT_ALIGNMENT
         border = EmptyBorder(13, 0, 13, 0)
     }
@@ -154,7 +154,7 @@ private class FullRow : JPanel() {
 
 private fun labelStack(title: String, subtitle: String?): JComponent = JPanel().apply {
     isOpaque = false
-    layout = BoxLayout(this, BoxLayout.Y_AXIS)
+    layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
     alignmentX = Component.LEFT_ALIGNMENT
     add(JLabel(title).apply {
         alignmentX = Component.LEFT_ALIGNMENT
@@ -179,7 +179,7 @@ internal fun settingsHint(text: String): JLabel = JLabel(text).apply {
 
 /** Wraps a component so it hugs the left edge inside a vertical BoxLayout. */
 internal fun settingsLeftAligned(comp: JComponent): JComponent =
-    Box.createHorizontalBox().apply {
+    Box(BoxLayout.LINE_AXIS).apply {
         alignmentX = Component.LEFT_ALIGNMENT
         add(comp)
         add(Box.createHorizontalGlue())
@@ -332,7 +332,7 @@ private class SettingsRow(left: JComponent, control: JComponent?) : JPanel(Borde
         border = EmptyBorder(11, 0, 11, 0)
         left.alignmentX = Component.LEFT_ALIGNMENT
         add(left, BorderLayout.CENTER)
-        if (control != null) add(control, BorderLayout.EAST)
+        if (control != null) add(control, BorderLayout.LINE_END)
     }
 
     override fun getMaximumSize(): Dimension = Dimension(Int.MAX_VALUE, preferredSize.height)

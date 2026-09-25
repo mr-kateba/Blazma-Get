@@ -1,5 +1,6 @@
 package xdm.app.ui.components
 
+import xdm.app.I8N
 import xdm.core.util.Logger
 import java.awt.Color
 import java.awt.Cursor
@@ -26,7 +27,7 @@ import javax.swing.border.MatteBorder
 class UpdatePanel : JPanel() {
 
     private val messageLabel = JLabel()
-    private val updateButton = JButton("Update")
+    private val updateButton = JButton(I8N.text("UPDATE_BTN"))
     private val dismissButton = JButton("✕")
     private var downloadUrl: String = ""
 
@@ -48,20 +49,20 @@ class UpdatePanel : JPanel() {
 
         messageLabel.apply {
             font = font.deriveFont(Font.PLAIN, 13f)
-            horizontalAlignment = SwingConstants.LEFT
+            horizontalAlignment = SwingConstants.LEADING
             verticalAlignment = SwingConstants.CENTER
         }
 
         updateButton.apply {
             name = "BTN_UPDATE_NOW"
-            toolTipText = "Open the XDM downloads page"
+            toolTipText = I8N.text("UPDATE_OPEN_PAGE")
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
             addActionListener { openDownloadPage() }
         }
 
         dismissButton.apply {
             name = "BTN_UPDATE_DISMISS"
-            toolTipText = "Dismiss"
+            toolTipText = I8N.text("UPDATE_DISMISS")
             isFocusPainted = false
             isBorderPainted = false
             isContentAreaFilled = false
@@ -85,7 +86,7 @@ class UpdatePanel : JPanel() {
         gc.gridx = 1
         gc.weightx = 1.0
         gc.fill = GridBagConstraints.HORIZONTAL
-        gc.anchor = GridBagConstraints.WEST
+        gc.anchor = GridBagConstraints.LINE_START
         gc.insets = Insets(0, 0, 0, 8)
         add(messageLabel, gc)
 
@@ -104,7 +105,7 @@ class UpdatePanel : JPanel() {
     /** Shows the banner with a message referencing [version] and remembers [url]. */
     fun showUpdate(version: String, url: String) {
         downloadUrl = url
-        messageLabel.text = "A new version ($version) of XDM is available."
+        messageLabel.text = I8N.text("UPDATE_AVAILABLE").format(version)
         isVisible = true
         revalidate()
         repaint()

@@ -40,7 +40,7 @@ class BrowserMonitorPanel : SettingsPanel() {
     private val tglGetServerTime = SettingsToggle()
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("SETTINGS_MONITORING")))
 
@@ -76,7 +76,7 @@ class BrowserMonitorPanel : SettingsPanel() {
                 settingsRow(
                     I8N.text("LBL_MIN_VIDEO_SIZE"),
                     I8N.text("LBL_MIN_VIDEO_SIZE_SUB"),
-                    Box.createHorizontalBox().apply {
+                    Box(BoxLayout.LINE_AXIS).apply {
                         add(cmbMinVidSize)
                         add(Box.createRigidArea(Dimension(8, 0)))
                         add(JLabel("MB").apply { foreground = settingsMutedColor() })
@@ -119,7 +119,7 @@ class BrowserMonitorPanel : SettingsPanel() {
             preferredSize = Dimension(preferredSize.width, 78)
             maximumSize = Dimension(Int.MAX_VALUE, 78)
         }
-        return Box.createVerticalBox().apply {
+        return Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             add(scroll)
             add(Box.createRigidArea(Dimension(0, 9)))
@@ -155,7 +155,7 @@ class BrowserMonitorPanel : SettingsPanel() {
 
         init {
             isOpaque = false
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
             border = EmptyBorder(16, 8, 14, 8)
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
 

@@ -1,5 +1,7 @@
 package xdm.app.ui.screens
 
+import javax.swing.border.EmptyBorder
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.utils.RemixIcon
@@ -141,25 +143,25 @@ class DownloadCompleteWindow : JDialog() {
     private fun infoCard(): JComponent {
         val card = JPanel(GridBagLayout()).apply {
             background = cardBg
-            border = BorderFactory.createEmptyBorder(12, 14, 12, 8)
+            border = EmptyBorder(UiLocale.mirrored(12, 14, 12, 8))
             putClientProperty("FlatLaf.style", "arc: 16")
         }
 
         fun row(gridY: Int, captionKey: String, field: JTextField, top: Int) {
             card.add(caption(captionKey), GridBagConstraints().apply {
-                gridx = 0; gridy = gridY; anchor = GridBagConstraints.WEST
+                gridx = 0; gridy = gridY; anchor = GridBagConstraints.LINE_START
                 insets = Insets(top, 0, 0, 0)
             })
             card.add(field, GridBagConstraints().apply {
                 gridx = 0; gridy = gridY + 1
-                anchor = GridBagConstraints.WEST
+                anchor = GridBagConstraints.LINE_START
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
                 insets = Insets(1, 0, 0, 8)
             })
             card.add(copyButton(field), GridBagConstraints().apply {
                 gridx = 1; gridy = gridY + 1; gridheight = 1
-                anchor = GridBagConstraints.EAST
+                anchor = GridBagConstraints.LINE_END
             })
         }
 
@@ -177,7 +179,7 @@ class DownloadCompleteWindow : JDialog() {
         title = text("CD_TITLE")
         defaultCloseOperation = DISPOSE_ON_CLOSE
 
-        val header = Box.createVerticalBox().apply {
+        val header = Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = Component.CENTER_ALIGNMENT
             add(JLabel(createIcon(RemixIcon.CHECKBOX_CIRCLE_FILL, 44, Color(0x2ECC71))).apply {
                 alignmentX = Component.CENTER_ALIGNMENT
@@ -193,7 +195,7 @@ class DownloadCompleteWindow : JDialog() {
         }
 
         val content = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
             border = BorderFactory.createEmptyBorder(24, 24, 16, 24)
             add(header)
             add(Box.createVerticalStrut(18))
@@ -202,12 +204,12 @@ class DownloadCompleteWindow : JDialog() {
 
         val footer = JPanel(BorderLayout()).apply {
             border = BorderFactory.createEmptyBorder(0, 24, 18, 24)
-            add(lblSkipNotification, BorderLayout.WEST)
-            add(Box.createHorizontalBox().apply {
+            add(lblSkipNotification, BorderLayout.LINE_START)
+            add(Box(BoxLayout.LINE_AXIS).apply {
                 add(btnOpenFolder)
                 add(Box.createHorizontalStrut(8))
                 add(btnOpenFile)
-            }, BorderLayout.EAST)
+            }, BorderLayout.LINE_END)
         }
 
         contentPane.layout = BorderLayout()

@@ -80,7 +80,7 @@ fun gbAdd(
     container: Container,
     gridX: Int = 0,
     gridY: Int = 0,
-    alignment: Int = GridBagConstraints.WEST,
+    alignment: Int = GridBagConstraints.LINE_START,
     padding: Insets = Insets(0, 0, 0, 0),
     colSpan: Int = 1,
     rowSpan: Int = 1,

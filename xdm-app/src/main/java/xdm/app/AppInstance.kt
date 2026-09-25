@@ -130,7 +130,7 @@ class AppInstance : IAppInstance {
             // Called on the browser-integration server thread.
             runOnUIThread {
                 refreshLinkWindow?.dispose()
-                MessageBox.show(appWindow, "XDM", text("SUCCESS_REFRESH"))
+                MessageBox.show(appWindow, APP_NAME, text("SUCCESS_REFRESH"))
             }
             return
         }

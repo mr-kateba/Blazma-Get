@@ -42,7 +42,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
     private val stopLabelsWeekly = mutableListOf<JComponent>()
 
     // Day-of-week checkboxes and corresponding Calendar constants (Mon–Sun order)
-    private val dayLabels = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    private val dayLabels = arrayOf("MSG_Q_D2", "MSG_Q_D3", "MSG_Q_D4", "MSG_Q_D5", "MSG_Q_D6", "MSG_Q_D7", "MSG_Q_D1").map { text(it) }
     private val dayConstants = intArrayOf(
         Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
         Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
@@ -100,7 +100,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblDownload, mainPanel,
             gridX = 0, gridY = 0,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 0, 12, 8)
         )
         gbAdd(
@@ -117,7 +117,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         typeGroup.add(radioOneTime)
         typeGroup.add(radioWeekly)
 
-        val typePanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0))
+        val typePanel = JPanel(FlowLayout(FlowLayout.LEADING, 0, 0))
         typePanel.add(radioOneTime)
         typePanel.add(Box.createRigidArea(Dimension(20, 0)))
         typePanel.add(radioWeekly)
@@ -125,7 +125,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblType, mainPanel,
             gridX = 0, gridY = 1,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 0, 10, 8)
         )
         gbAdd(
@@ -168,7 +168,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         val btnBar = JPanel()
         btnBar.background = UIManager.getColor("Table.background")
         btnBar.border = EmptyBorder(10, 15, 10, 15)
-        btnBar.layout = BoxLayout(btnBar, BoxLayout.X_AXIS)
+        btnBar.layout = BoxLayout(btnBar, BoxLayout.LINE_AXIS)
 
         val btnCancel = JButton(text("ND_CANCEL"))
         btnCancel.addActionListener { dispose() }
@@ -210,7 +210,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblDate, panel,
             gridX = 0, gridY = 0,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(8, 10, 8, 8)
         )
         gbAdd(
@@ -223,7 +223,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblTime, panel,
             gridX = 0, gridY = 1,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
         gbAdd(hourSpinnerOneTime, panel, gridX = 1, gridY = 1, padding = Insets(0, 0, 12, 4))
@@ -240,7 +240,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblStopDate, panel,
             gridX = 0, gridY = 3,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 8, 8)
         )
         gbAdd(
@@ -253,7 +253,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblStopTime, panel,
             gridX = 0, gridY = 4,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
         gbAdd(stopHourSpinnerOneTime, panel, gridX = 1, gridY = 4, padding = Insets(0, 0, 12, 4))
@@ -286,7 +286,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblDays, panel,
             gridX = 0, gridY = 0,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(8, 10, 8, 8)
         )
         gbAdd(
@@ -299,7 +299,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblTime, panel,
             gridX = 0, gridY = 1,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
         gbAdd(hourSpinnerWeekly, panel, gridX = 1, gridY = 1, padding = Insets(0, 0, 12, 4))
@@ -316,7 +316,7 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
         gbAdd(
             lblStopTime, panel,
             gridX = 0, gridY = 3,
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
         gbAdd(stopHourSpinnerWeekly, panel, gridX = 1, gridY = 3, padding = Insets(0, 0, 12, 4))

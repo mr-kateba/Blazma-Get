@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatLaf
 import xdm.app.AppContext
 import xdm.app.AppContext.app
@@ -24,6 +25,8 @@ import javax.swing.border.EmptyBorder
 import javax.swing.border.MatteBorder
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
+
+private const val SIDEBAR_WIDTH = 180
 
 class AppWindow(image: Image) : JFrame(), ActionListener {
     private val listView = MainListView()
@@ -92,9 +95,26 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
         }
         val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT).apply {
             border = MatteBorder(1, 0, 0, 0, topBorderColor)
-            dividerLocation = 180
-            leftComponent = filterPanel.component
-            rightComponent = panel
+            if (UiLocale.isRtl) {
+                // JSplitPane does not mirror: put the sidebar on the right and let the
+                // list take all extra width, so the sidebar keeps its size on resize.
+                leftComponent = panel
+                rightComponent = filterPanel.component
+                resizeWeight = 1.0
+                addComponentListener(object : java.awt.event.ComponentAdapter() {
+                    private var placed = false
+                    override fun componentResized(e: java.awt.event.ComponentEvent) {
+                        if (!placed && width > 0) {
+                            placed = true
+                            dividerLocation = width - SIDEBAR_WIDTH - dividerSize
+                        }
+                    }
+                })
+            } else {
+                dividerLocation = SIDEBAR_WIDTH
+                leftComponent = filterPanel.component
+                rightComponent = panel
+            }
             if (AppContext.config.theme == "light") {
                 background = UIManager.getColor("Table.background")
             }

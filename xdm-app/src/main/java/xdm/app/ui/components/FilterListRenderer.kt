@@ -1,6 +1,7 @@
 package xdm.app.ui.components
 
 
+import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatLaf
 import xdm.app.ui.screens.settings.settingsAccentColor
 import xdm.app.utils.RemixIcon
@@ -38,7 +39,7 @@ class FilterListRenderer : ListCellRenderer<FilterItem> {
         icon = createIcon(RemixIcon.ARROW_UP_DOWN_FILL, 20, Color.GRAY)
         iconTextGap = 10
         // The same border in both states, so selecting a row never shifts its text.
-        border = EmptyBorder(8, 10, 8, 15)
+        border = EmptyBorder(UiLocale.mirrored(8, 10, 8, 15))
     }
 
     override fun getListCellRendererComponent(

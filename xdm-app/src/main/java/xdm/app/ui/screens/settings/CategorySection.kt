@@ -38,20 +38,20 @@ class CategorySection {
     private val categories = mutableListOf<DownloadCategory>()
     private val rows = JPanel().apply {
         isOpaque = false
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
         alignmentX = Component.LEFT_ALIGNMENT
     }
     private val emptyHint = settingsHint(I8N.text("CAT_EMPTY")).apply { isVisible = false }
 
     /** The card to drop into a settings panel. */
     val component: JComponent by lazy {
-        val footer = Box.createHorizontalBox().apply {
+        val footer = Box(BoxLayout.LINE_AXIS).apply {
             alignmentX = Component.LEFT_ALIGNMENT
             add(settingsButton(I8N.text("CAT_ADD")) { addCategory() })
             add(Box.createHorizontalGlue())
             add(settingsButton(I8N.text("DESC_DEF")) { restoreDefaults() })
         }
-        val list = Box.createVerticalBox().apply {
+        val list = Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = Component.LEFT_ALIGNMENT
             add(settingsLeftAligned(settingsHint(I8N.text("CAT_DESC"))))
             add(Box.createRigidArea(Dimension(0, 4)))
@@ -150,13 +150,13 @@ class CategorySection {
                     verticalAlignment = SwingConstants.TOP
                     border = EmptyBorder(2, 2, 0, 0)
                 },
-                BorderLayout.WEST
+                BorderLayout.LINE_START
             )
 
             val extensions = DownloadCategory.formatExtensions(category.extensions)
             val text = JPanel().apply {
                 isOpaque = false
-                layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
                 add(EllipsisLabel().apply {
                     font = font.deriveFont(Font.BOLD, 13.0f)
                     setText(category.displayName)
@@ -171,11 +171,11 @@ class CategorySection {
             }
             add(text, BorderLayout.CENTER)
 
-            val actions = Box.createHorizontalBox().apply {
+            val actions = Box(BoxLayout.LINE_AXIS).apply {
                 add(settingsIconButton(RemixIcon.EDIT_LINE, I8N.text("CAT_EDIT")) { editAt(index) })
                 add(settingsIconButton(RemixIcon.DELETE_BIN_LINE, I8N.text("CAT_DELETE")) { deleteAt(index) })
             }
-            add(actions, BorderLayout.EAST)
+            add(actions, BorderLayout.LINE_END)
 
             addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) {

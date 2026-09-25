@@ -27,7 +27,7 @@ class DownloadsPanel : SettingsPanel() {
     private val cmbRetry = numberCombo((1..99).toList())
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("SETTINGS_DOWNLOADS")))
 
@@ -67,7 +67,7 @@ class DownloadsPanel : SettingsPanel() {
 
     /** A control with a trailing unit label ("KB/s", "seconds") instead of one baked into the title. */
     private fun withSuffix(control: JComponent, suffix: String): JComponent =
-        Box.createHorizontalBox().apply {
+        Box(BoxLayout.LINE_AXIS).apply {
             add(control)
             add(Box.createRigidArea(Dimension(8, 0)))
             add(JLabel(suffix).apply { foreground = settingsMutedColor() })

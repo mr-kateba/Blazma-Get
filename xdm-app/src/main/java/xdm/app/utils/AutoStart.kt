@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
  */
 object AutoStart {
     private const val LABEL = "app.xdm.autostart"
-    private const val APP_NAME = "Xtreme Download Manager"
+    private const val APP_NAME = xdm.app.APP_NAME
 
     private const val WIN_RUN_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
     private const val WIN_VALUE_NAME = "XDM"

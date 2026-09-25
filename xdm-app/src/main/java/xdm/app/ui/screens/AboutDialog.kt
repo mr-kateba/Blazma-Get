@@ -1,6 +1,9 @@
 package xdm.app.ui.screens
 
+import xdm.app.APP_HOME_PAGE
+import xdm.app.APP_NAME
 import xdm.app.AppContext
+import xdm.app.I8N
 import xdm.app.update.UpdateChecker
 import xdm.app.utils.logoIcon
 import java.awt.*
@@ -10,8 +13,8 @@ import javax.swing.border.EmptyBorder
 class AboutDialog(owner: Window?) : JDialog(owner) {
 
     init {
-        setSize(400, 350)
-        title = "About XDM"
+        setSize(460, 440)
+        title = I8N.text("TITLE_ABOUT")
         isModal = true
         defaultCloseOperation = DISPOSE_ON_CLOSE
         isResizable = false
@@ -31,24 +34,36 @@ class AboutDialog(owner: Window?) : JDialog(owner) {
         }
 
         val version = UpdateChecker.loadConfig()?.currentVersion ?: ""
-        val appName = JLabel("Xtreme Download Manager $version".trim()).apply {
+        val appName = JLabel("$APP_NAME $version".trim()).apply {
             font = font.deriveFont(Font.PLAIN, 16f)
             horizontalAlignment = SwingConstants.CENTER
         }
 
-        val copyright = JLabel("© 2013 - 2026 Subhra Das Gupta").apply {
+        val basedOn = JLabel(I8N.text("ABOUT_BASED_ON")).apply {
             font = font.deriveFont(Font.PLAIN, 13f)
             horizontalAlignment = SwingConstants.CENTER
         }
 
-        val website = JLabel("www.xtremedownloadmanager.com").apply {
+        val copyright = JLabel("© 2013 - 2026 Subhra Das Gupta · © 2026 Blazma").apply {
+            font = font.deriveFont(Font.PLAIN, 12f)
+            foreground = UIManager.getColor("Label.disabledForeground")
+            horizontalAlignment = SwingConstants.CENTER
+        }
+
+        val license = JLabel(I8N.text("ABOUT_LICENSE")).apply {
+            font = font.deriveFont(Font.PLAIN, 12f)
+            foreground = UIManager.getColor("Label.disabledForeground")
+            horizontalAlignment = SwingConstants.CENTER
+        }
+
+        val website = JLabel(APP_HOME_PAGE.removePrefix("https://")).apply {
             horizontalAlignment = SwingConstants.CENTER
             foreground = UIManager.getColor("ProgressBar.foreground")
             cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
             addMouseListener(object : java.awt.event.MouseAdapter() {
                 override fun mouseClicked(e: java.awt.event.MouseEvent) {
                     try {
-                        Desktop.getDesktop().browse(java.net.URI("https://www.xtremedownloadmanager.com"))
+                        Desktop.getDesktop().browse(java.net.URI(APP_HOME_PAGE))
                     } catch (_: Exception) {
                     }
                 }
@@ -81,7 +96,9 @@ class AboutDialog(owner: Window?) : JDialog(owner) {
 
         panel.add(logoLabel, gc)
         panel.add(appName, gc)
+        panel.add(basedOn, gc)
         panel.add(copyright, gc)
+        panel.add(license, gc)
         panel.add(website, gc)
 
 //        val sep = JSeparator().apply { maximumSize = Dimension(Int.MAX_VALUE, 1) }

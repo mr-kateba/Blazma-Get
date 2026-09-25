@@ -97,12 +97,12 @@ class ProgressWindow(val id: Long) : JFrame() {
         }
         lblStat2.text = textBuf.toString()
         if (speed > 0) {
-            lblStat3.text = "Speed " + formatSize(speed.toDouble()) + "/s"
+            lblStat3.text = text("LBL_SPEED") + " " + formatSize(speed.toDouble()) + "/s"
         } else {
-            lblStat3.text = "Speed ---"
+            lblStat3.text = text("LBL_SPEED") + " ---"
         }
         if (eta > 0) {
-            lblStat4.text = toLongEta(eta) + " left"
+            lblStat4.text = text("LBL_TIME_LEFT").format(toLongEta(eta))
         } else {
             lblStat4.text = "---"
         }
@@ -147,7 +147,7 @@ class ProgressWindow(val id: Long) : JFrame() {
         size = Dimension(400, 260)
         setLocationRelativeTo(null)
 
-        val b1 = Box.createHorizontalBox().apply {
+        val b1 = Box(BoxLayout.LINE_AXIS).apply {
             border = BorderFactory.createEmptyBorder(10, 15, 10, 15)
             add(Box.createHorizontalGlue())
             add(btnHide)
@@ -167,14 +167,14 @@ class ProgressWindow(val id: Long) : JFrame() {
 
         gbAdd(
             prg, contentPane, padding = Insets(20, 15, 0, 0),
-            rowSpan = 5, alignment = GridBagConstraints.NORTHWEST
+            rowSpan = 5, alignment = GridBagConstraints.FIRST_LINE_START
         )
         gbAdd(
             lblFileName,
             contentPane,
             gridX = 1,
             padding = Insets(20, 10, 0, 0),
-            alignment = GridBagConstraints.SOUTHWEST,
+            alignment = GridBagConstraints.LAST_LINE_START,
             colSpan = 2,
         )
         gbAdd(
@@ -183,7 +183,7 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 1,
             gridY = 1,
             padding = Insets(5, 10, 15, 15),
-            alignment = GridBagConstraints.NORTHWEST,
+            alignment = GridBagConstraints.FIRST_LINE_START,
             colSpan = 2,
         )
         gbAdd(
@@ -192,7 +192,7 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 1,
             gridY = 2,
             padding = Insets(15, 10, 5, 5),
-            alignment = GridBagConstraints.WEST,
+            alignment = GridBagConstraints.LINE_START,
         )
         gbAdd(
             lblStat2,
@@ -200,7 +200,7 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 2,
             gridY = 2,
             padding = Insets(15, 10, 5, 15),
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
         )
         gbAdd(
             segPanel,
@@ -208,7 +208,7 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 1,
             gridY = 3,
             padding = Insets(5, 10, 5, 15),
-            alignment = GridBagConstraints.WEST,
+            alignment = GridBagConstraints.LINE_START,
             colSpan = 2,
             horizontalFill = true,
         )
@@ -218,7 +218,7 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 1,
             gridY = 4,
             padding = Insets(5, 10, 5, 5),
-            alignment = GridBagConstraints.WEST,
+            alignment = GridBagConstraints.LINE_START,
         )
         gbAdd(
             lblStat4,
@@ -226,14 +226,14 @@ class ProgressWindow(val id: Long) : JFrame() {
             gridX = 2,
             gridY = 4,
             padding = Insets(5, 10, 5, 15),
-            alignment = GridBagConstraints.EAST,
+            alignment = GridBagConstraints.LINE_END,
         )
         gbAdd(
             b1,
             contentPane,
             gridX = 0,
             gridY = 6,
-            alignment = GridBagConstraints.WEST,
+            alignment = GridBagConstraints.LINE_START,
             colSpan = 3,
             horizontalFill = true,
         )

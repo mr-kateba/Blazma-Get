@@ -89,7 +89,7 @@ object UpdateChecker {
             readTimeout = 10_000
             instanceFollowRedirects = true
             // GitHub's API rejects requests without a User-Agent.
-            setRequestProperty("User-Agent", "XDM-Update-Checker")
+            setRequestProperty("User-Agent", "Blazma-Get-Update-Checker")
             setRequestProperty("Accept", "application/vnd.github+json")
         }
         try {

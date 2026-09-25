@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import javax.swing.BoxLayout
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.ui.screens.settings.AdvancedConfigPanel
@@ -103,7 +104,7 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
             )
         }
 
-        val bottom = Box.createHorizontalBox().apply {
+        val bottom = Box(BoxLayout.LINE_AXIS).apply {
             border = EmptyBorder(14, 24, 16, 24)
             // The language note belongs to the dialog, not to one row: it is the restart that
             // applies the change, and the restart applies it whichever page you saved from.
@@ -120,7 +121,7 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
             add(FooterBar(bottom), BorderLayout.SOUTH)
         }
 
-        add(NavRail(navList), BorderLayout.WEST)
+        add(NavRail(navList), BorderLayout.LINE_START)
         add(center, BorderLayout.CENTER)
 
         navList.selectedIndex = 0

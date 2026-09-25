@@ -106,7 +106,7 @@ class BatchDownloadDialog(owner: Window?, urls: List<String>) : JDialog(owner) {
         add(panel1)
 
         val southPanel = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
             border = EmptyBorder(0, 0, 0, 0)
         }
         add(southPanel, BorderLayout.SOUTH)
@@ -121,10 +121,10 @@ class BatchDownloadDialog(owner: Window?, urls: List<String>) : JDialog(owner) {
         }
 
         val lblSaveIn = JLabel(text("LBL_SAVE_IN")).apply {
-            horizontalAlignment = SwingConstants.RIGHT
+            horizontalAlignment = SwingConstants.TRAILING
         }
         panel.add(lblSaveIn, GridBagConstraints().apply {
-            anchor = GridBagConstraints.EAST
+            anchor = GridBagConstraints.LINE_END
             insets = Insets(0, 0, 0, 10)
             gridx = 0
             gridy = 0
@@ -166,7 +166,7 @@ class BatchDownloadDialog(owner: Window?, urls: List<String>) : JDialog(owner) {
         val panel = JPanel().apply {
             //background = UIManager.getColor("Table.background")
             border = EmptyBorder(0, 10, 10, 10)
-            layout = BoxLayout(this, BoxLayout.X_AXIS)
+            layout = BoxLayout(this, BoxLayout.LINE_AXIS)
         }
 
         panel.add(Box.createHorizontalGlue())

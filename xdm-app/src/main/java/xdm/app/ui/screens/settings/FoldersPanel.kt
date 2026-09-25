@@ -23,7 +23,7 @@ class FoldersPanel : SettingsPanel() {
     private val categorySection = CategorySection()
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("SETTINGS_FOLDERS")))
 
@@ -38,7 +38,7 @@ class FoldersPanel : SettingsPanel() {
                 settingsFullRow(
                     I8N.text("LBL_TEMP_FOLDER"),
                     I8N.text("LBL_TEMP_FOLDER_SUB"),
-                    Box.createVerticalBox().apply {
+                    Box(BoxLayout.PAGE_AXIS).apply {
                         alignmentX = LEFT_ALIGNMENT
                         add(folderInput(txtTmpDir))
                         add(Box.createRigidArea(Dimension(0, 8)))
@@ -56,7 +56,7 @@ class FoldersPanel : SettingsPanel() {
 
     /** A rounded path field with a plain text button beside it. */
     private fun folderInput(field: JTextField): JComponent =
-        Box.createHorizontalBox().apply {
+        Box(BoxLayout.LINE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             val h = field.preferredSize.height
             field.maximumSize = Dimension(Int.MAX_VALUE, h)

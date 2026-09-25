@@ -53,11 +53,11 @@ class NetworkConfigPanel : SettingsPanel() {
     private val tglIgnoreCertErrors = SettingsToggle()
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("SETTINGS_NETWORK")))
 
-        proxyFields = Box.createVerticalBox().apply {
+        proxyFields = Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             // The gap lives inside the collapsible box so hiding it leaves no dead space.
             add(Box.createRigidArea(Dimension(0, 16)))
@@ -77,7 +77,7 @@ class NetworkConfigPanel : SettingsPanel() {
                 // rather than leaving a hairline and an empty band behind.
                 settingsFullRow(
                     null, I8N.text("SETTINGS_SEC_PROXY_SUB"),
-                    Box.createVerticalBox().apply {
+                    Box(BoxLayout.PAGE_AXIS).apply {
                         alignmentX = LEFT_ALIGNMENT
                         add(optProxy)
                         add(proxyFields)
@@ -93,7 +93,7 @@ class NetworkConfigPanel : SettingsPanel() {
                 settingsRow(
                     I8N.text("MSG_READ_TIMEOUT"),
                     I8N.text("MSG_READ_TIMEOUT_HINT"),
-                    Box.createHorizontalBox().apply {
+                    Box(BoxLayout.LINE_AXIS).apply {
                         add(spReadTimeout)
                         add(Box.createRigidArea(Dimension(8, 0)))
                         add(JLabel(I8N.text("MSG_SECONDS")).apply { foreground = settingsMutedColor() })
@@ -122,7 +122,7 @@ class NetworkConfigPanel : SettingsPanel() {
 
     /** A caption above a full-width field. */
     private fun labelledField(caption: String, field: JComponent): JComponent =
-        Box.createVerticalBox().apply {
+        Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             add(settingsLeftAligned(settingsHint(caption)))
             add(Box.createRigidArea(Dimension(0, 5)))
@@ -133,7 +133,7 @@ class NetworkConfigPanel : SettingsPanel() {
 
     /** A caption above a fixed-width field, so a port box does not stretch across the card. */
     private fun fieldWithCaption(caption: String, field: JComponent): JComponent =
-        Box.createVerticalBox().apply {
+        Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             add(settingsLeftAligned(settingsHint(caption)))
             add(Box.createRigidArea(Dimension(0, 5)))

@@ -38,7 +38,7 @@ class AdvancedConfigPanel : SettingsPanel() {
     private val btnBrowse: JButton = settingsButton(I8N.text("SETTINGS_FOLDER_CHANGE")) { chooseScanner() }
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("MSG_ADV_TITLE")))
 
@@ -67,7 +67,7 @@ class AdvancedConfigPanel : SettingsPanel() {
                 settingsRow(I8N.text("MSG_SCAN"), I8N.text("MSG_SCAN_SUB"), tglVirusScan),
                 settingsFullRow(
                     null, null,
-                    Box.createHorizontalBox().apply {
+                    Box(BoxLayout.LINE_AXIS).apply {
                         alignmentX = LEFT_ALIGNMENT
                         txtVirusScan.maximumSize = Dimension(Int.MAX_VALUE, txtVirusScan.preferredSize.height)
                         add(txtVirusScan)
@@ -86,7 +86,7 @@ class AdvancedConfigPanel : SettingsPanel() {
     }
 
     private fun fullWidth(comp: JComponent): JComponent =
-        Box.createHorizontalBox().apply {
+        Box(BoxLayout.LINE_AXIS).apply {
             alignmentX = LEFT_ALIGNMENT
             comp.maximumSize = Dimension(Int.MAX_VALUE, comp.preferredSize.height)
             add(comp)

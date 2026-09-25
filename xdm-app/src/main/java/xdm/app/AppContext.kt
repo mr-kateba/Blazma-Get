@@ -58,13 +58,15 @@ object AppContext {
             }
 
             if (firstRun) {
-                Logger.info("First run: enabling start-on-login")
+                config.lang = UiLocale.defaultLanguage()
+                Logger.info("First run: language ${config.lang}, enabling start-on-login")
                 config.runOnStartup = AutoStart.setEnabled(true)
                 config.save()
             }
 
             Logger.info("Setting up look-and-feel theme: ${config.theme}")
-            AppMain.setupTheme(config.theme)
+            AppMain.setupTheme(config.theme, config.lang)
+            UiLocale.applyDirection(config.lang)
 
             Logger.info("Setting up global authenticator...")
             config.applyAuthConfig()

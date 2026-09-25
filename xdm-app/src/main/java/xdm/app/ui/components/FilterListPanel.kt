@@ -1,6 +1,7 @@
 package xdm.app.ui.components
 
 
+import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatLaf
 import xdm.app.AppContext
 import xdm.app.DownloadCategory
@@ -89,7 +90,7 @@ class FilterListPanel(
             UIManager.getColor("Component.borderColor") ?: Color.GRAY
         }
         jsp = JScrollPane(box).apply {
-            border = MatteBorder(0, 0, 0, 1, dividerColor)
+            border = MatteBorder(UiLocale.mirrored(0, 0, 0, 1), dividerColor)
             // The rows never fill the sidebar's height, so the viewport has to carry the
             // same colour as the panel -- otherwise the strip below the last row shows the
             // scroll pane's own background instead.
@@ -189,7 +190,7 @@ class FilterListPanel(
      */
     private class FilterBox : JPanel(), Scrollable {
         init {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
         }
 
         override fun getPreferredScrollableViewportSize(): Dimension = preferredSize

@@ -49,7 +49,7 @@ class GeneralPanel : SettingsPanel() {
     private val langProp = Properties()
 
     init {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
 
         add(settingsTitle(I8N.text("SETTINGS_GENERAL")))
 
