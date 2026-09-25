@@ -77,7 +77,12 @@ class GeneralPanel : SettingsPanel() {
                 StandardCharsets.UTF_8
             )
         )
-        langModel.addAll(langProp.values.map { it.toString() })
+        // Arabic and English first, the rest alphabetically (Properties has no order of its own).
+        val first = listOf("ar", "en")
+        langModel.addAll(
+            first.mapNotNull { langProp[it]?.toString() } +
+                langProp.filterKeys { it !in first }.values.map { it.toString() }.sortedBy { it.lowercase() }
+        )
 
         add(
             settingsSection(

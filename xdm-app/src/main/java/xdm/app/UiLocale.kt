@@ -69,20 +69,29 @@ object UiLocale {
     }
 
     /**
-     * Keeps number and date formatting on Western digits (1 2 3) even on an Arabic or Persian
-     * system, so sizes, speeds and spinners never mix two digit styles on one screen.
+     * Makes dates and numbers follow the UI language rather than the system's (English UI on an
+     * Arabic Windows no longer shows Arabic month names), keeps the system's region, and always
+     * uses Western digits (1 2 3) so sizes, speeds and spinners never mix two digit styles.
      */
-    fun useLatinDigits() {
-        // Swing components take Locale.getDefault(), formatters the FORMAT category; fix both.
-        val current = Locale.getDefault()
-        if (current.language in rtlLanguages) {
-            Locale.setDefault(Locale.Builder().setLocale(current).setUnicodeLocaleKeyword("nu", "latn").build())
+    fun useUiLocale(lang: String) {
+        val system = Locale.getDefault()
+        val language = when (val base = baseLanguage(lang)) {
+            "tw" -> "zh"
+            "np" -> "ne"
+            else -> base
         }
+        val locale = runCatching {
+            Locale.Builder().setLanguage(language).setRegion(system.country)
+                .setUnicodeLocaleKeyword("nu", "latn").build()
+        }.recoverCatching {
+            Locale.Builder().setLanguage(language).setUnicodeLocaleKeyword("nu", "latn").build()
+        }.getOrNull() ?: return
+        Locale.setDefault(locale)
     }
 
     /** Turns on right-to-left layout for every window when [lang] is written right to left. */
     fun applyDirection(lang: String) {
-        useLatinDigits()
+        useUiLocale(lang)
         isRtl = isRtlLanguage(lang)
         if (!isRtl) return
         Toolkit.getDefaultToolkit().addAWTEventListener({ e ->

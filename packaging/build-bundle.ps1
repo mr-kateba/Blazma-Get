@@ -31,7 +31,10 @@ $Modules = 'java.desktop,java.logging,jdk.crypto.ec,jdk.unsupported'
 # Locale data only for the UI languages (Arabic month names, etc.): a few MB instead of ~15.
 # -WithLocales keeps every locale.
 $Modules += ',jdk.localedata'
-$LocaleArgs = if ($WithLocales) { @() } else { @('--include-locales=en,ar,de,tr,fr,ru,zh,sr,pt,id,es,cs,fa,it,ko,pl,ro,vi,ml,ne,hu,uk') }
+# [string[]] keeps a one-element list an array (a bare `if` expression would unroll it to a
+# string, and splatting a string passes it character by character).
+[string[]]$LocaleArgs = @()
+if (-not $WithLocales) { $LocaleArgs = @('--include-locales=en,ar,de,tr,fr,ru,zh,sr,pt,id,es,cs,fa,it,ko,pl,ro,vi,ml,ne,hu,uk') }
 
 # JVM tuning flags baked into the launcher. See the comment block in
 # build-bundle.sh for the measurements behind this set: SerialGC keeps
@@ -99,7 +102,7 @@ if (-not $AppVersion) { $AppVersion = '1.0.0' }
 Write-Host ">> jlink runtime: $Modules"
 Remove-Item -Recurse -Force $RuntimeDir, $InputDir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $InputDir, $DestDir | Out-Null
-& jlink --add-modules $Modules @LocaleArgs --strip-debug --no-header-files --no-man-pages `
+& jlink --add-modules $Modules $LocaleArgs --strip-debug --no-header-files --no-man-pages `
         --compress=$compress --output $RuntimeDir
 if ($LASTEXITCODE -ne 0) { throw 'jlink failed' }
 
