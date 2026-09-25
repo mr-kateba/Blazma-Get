@@ -3,6 +3,7 @@ package xdm.app
 import xdm.core.util.Logger
 import java.awt.AWTEvent
 import java.awt.Component
+import java.awt.Container
 import java.awt.ComponentOrientation
 import java.awt.Font
 import java.awt.GraphicsEnvironment
@@ -11,6 +12,7 @@ import java.awt.Window
 import java.awt.event.ContainerEvent
 import java.awt.event.WindowEvent
 import java.util.Locale
+import javax.swing.JComponent
 
 /**
  * Language-dependent look of the UI: picks the first-run language, the text direction and the
@@ -101,10 +103,33 @@ object UiLocale {
     fun mirrored(top: Int, left: Int, bottom: Int, right: Int): java.awt.Insets =
         if (isRtl) java.awt.Insets(top, right, bottom, left) else java.awt.Insets(top, left, bottom, right)
 
+    /**
+     * Keeps a Latin run (a size, a speed, a path) in its own left-to-right order inside
+     * right-to-left text, so "1.5 MB/s" never shows up as "MB/s 1.5". Labels only: the
+     * embedding marks would end up in the value of an editable field.
+     */
+    fun ltr(s: String): String = if (isRtl) "\u202A$s\u202C" else s
+
+    private const val KEEP_LTR = "blazma.keepLtr"
+
+    /** Keeps [c] left-to-right in an RTL window: for paths and addresses, which read LTR. */
+    fun <T : JComponent> keepLtr(c: T): T = c.apply {
+        putClientProperty(KEEP_LTR, true)
+        componentOrientation = ComponentOrientation.LEFT_TO_RIGHT
+    }
+
+    private fun restoreLtr(c: Component) {
+        if (c is JComponent && c.getClientProperty(KEEP_LTR) == true) {
+            c.componentOrientation = ComponentOrientation.LEFT_TO_RIGHT
+        }
+        if (c is Container) c.components.forEach { restoreLtr(it) }
+    }
+
     /** Applies RTL to [c] and its children, and relayouts it if it was already on screen. */
     fun mirror(c: Component?) {
         if (c == null || !isRtl || !c.componentOrientation.isLeftToRight && c !is Window) return
         c.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT)
+        restoreLtr(c)
         if (c.isShowing) {
             c.revalidate()
             c.repaint()

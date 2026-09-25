@@ -49,7 +49,7 @@ class DownloadCompleteWindow : JDialog() {
         ?: UIManager.getColor("TextField.background")
         ?: Color(0x2B2B2B)
 
-    private val txtFolderPath = borderlessField()
+    private val txtFolderPath = UiLocale.keepLtr(borderlessField())
     private val txtFileName = borderlessField()
     private val lblFileSize = JLabel("---").apply {
         foreground = mutedFg
@@ -104,7 +104,7 @@ class DownloadCompleteWindow : JDialog() {
         txtFileName.caretPosition = 0
         txtFileName.toolTipText = file
         txtFolderPath.toolTipText = folder
-        lblFileSize.text = formatSize(fileSize.toDouble())
+        lblFileSize.text = UiLocale.ltr(formatSize(fileSize.toDouble()))
     }
 
     private fun borderlessField() = JTextField().apply {

@@ -317,17 +317,23 @@ class MainListViewRow(
     private fun getStatusText(ent: DbRecord): String {
         val text = StringBuilder(80)
         text.append(formatDateShort(ent.date))
+        // Sizes and speed form one Latin run, kept left-to-right as a whole in the Arabic UI.
+        val sizes = StringBuilder(40)
         if (ent.downloaded > 0) {
-            text.append(gap).append(formatSize(ent.downloaded.toDouble()))
+            sizes.append(formatSize(ent.downloaded.toDouble()))
         }
         if (ent.size > 0) {
-            text.append(" / ").append(formatSize(ent.size.toDouble()))
+            if (sizes.isNotEmpty()) sizes.append(" / ")
+            sizes.append(formatSize(ent.size.toDouble()))
         }
         if (ent.speed > 0 && ent.status == RecordStatus.DOWNLOADING) {
-            text.append(" (").append(formatSize(ent.speed.toDouble())).append("/s)")
+            sizes.append(" (").append(formatSize(ent.speed.toDouble())).append("/s)")
+        }
+        if (sizes.isNotEmpty()) {
+            text.append(gap).append(UiLocale.ltr(sizes.toString()))
         }
         if (ent.eta > 0 && ent.status == RecordStatus.DOWNLOADING) {
-            text.append(gap).append(xdm.app.I8N.text("LBL_TIME_LEFT").format(toLongEta(ent.eta)))
+            text.append(gap).append(xdm.app.I8N.text("LBL_TIME_LEFT").format(UiLocale.ltr(toLongEta(ent.eta))))
         }
         return text.toString()
     }

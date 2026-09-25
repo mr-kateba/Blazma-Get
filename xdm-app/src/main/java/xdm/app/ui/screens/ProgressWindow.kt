@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.ui.components.AppMenuHandler
@@ -85,24 +86,24 @@ class ProgressWindow(val id: Long) : JFrame() {
         lblStat1.text = textBuf.toString()
         textBuf.clear()
         if (downloaded > 0) {
-            textBuf.append(formatSize(downloaded.toDouble()))
+            textBuf.append(UiLocale.ltr(formatSize(downloaded.toDouble())))
         } else {
             textBuf.append("---")
         }
         textBuf.append(" / ")
         if (size > 0) {
-            textBuf.append(formatSize(size.toDouble()))
+            textBuf.append(UiLocale.ltr(formatSize(size.toDouble())))
         } else {
             textBuf.append("---")
         }
         lblStat2.text = textBuf.toString()
         if (speed > 0) {
-            lblStat3.text = text("LBL_SPEED") + " " + formatSize(speed.toDouble()) + "/s"
+            lblStat3.text = text("LBL_SPEED") + " " + UiLocale.ltr(formatSize(speed.toDouble()) + "/s")
         } else {
             lblStat3.text = text("LBL_SPEED") + " ---"
         }
         if (eta > 0) {
-            lblStat4.text = text("LBL_TIME_LEFT").format(toLongEta(eta))
+            lblStat4.text = text("LBL_TIME_LEFT").format(UiLocale.ltr(toLongEta(eta)))
         } else {
             lblStat4.text = "---"
         }

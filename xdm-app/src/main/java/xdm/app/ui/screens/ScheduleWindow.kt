@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.ScheduleEntry
@@ -42,6 +43,11 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
     private val stopLabelsWeekly = mutableListOf<JComponent>()
 
     // Day-of-week checkboxes and corresponding Calendar constants (Mon–Sun order)
+    // Times read hour:minute left to right in every language, so the spinners swap columns
+    // in the mirrored (RTL) grid to keep the hour on the left.
+    private val hourColumn = if (UiLocale.isRtl) 3 else 1
+    private val minuteColumn = if (UiLocale.isRtl) 1 else 3
+
     private val dayLabels = arrayOf("MSG_Q_D2", "MSG_Q_D3", "MSG_Q_D4", "MSG_Q_D5", "MSG_Q_D6", "MSG_Q_D7", "MSG_Q_D1").map { text(it) }
     private val dayConstants = intArrayOf(
         Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
@@ -226,9 +232,9 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
             alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
-        gbAdd(hourSpinnerOneTime, panel, gridX = 1, gridY = 1, padding = Insets(0, 0, 12, 4))
+        gbAdd(hourSpinnerOneTime, panel, gridX = hourColumn, gridY = 1, padding = Insets(0, 0, 12, 4))
         gbAdd(lblColon, panel, gridX = 2, gridY = 1, padding = Insets(0, 0, 12, 4))
-        gbAdd(minuteSpinnerOneTime, panel, gridX = 3, gridY = 1, padding = Insets(0, 0, 12, 10))
+        gbAdd(minuteSpinnerOneTime, panel, gridX = minuteColumn, gridY = 1, padding = Insets(0, 0, 12, 10))
 
         gbAdd(
             chkStopOneTime, panel,
@@ -256,9 +262,9 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
             alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
-        gbAdd(stopHourSpinnerOneTime, panel, gridX = 1, gridY = 4, padding = Insets(0, 0, 12, 4))
+        gbAdd(stopHourSpinnerOneTime, panel, gridX = hourColumn, gridY = 4, padding = Insets(0, 0, 12, 4))
         gbAdd(lblStopColon, panel, gridX = 2, gridY = 4, padding = Insets(0, 0, 12, 4))
-        gbAdd(stopMinuteSpinnerOneTime, panel, gridX = 3, gridY = 4, padding = Insets(0, 0, 12, 10))
+        gbAdd(stopMinuteSpinnerOneTime, panel, gridX = minuteColumn, gridY = 4, padding = Insets(0, 0, 12, 10))
 
         return panel
     }
@@ -302,9 +308,9 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
             alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
-        gbAdd(hourSpinnerWeekly, panel, gridX = 1, gridY = 1, padding = Insets(0, 0, 12, 4))
+        gbAdd(hourSpinnerWeekly, panel, gridX = hourColumn, gridY = 1, padding = Insets(0, 0, 12, 4))
         gbAdd(lblColon, panel, gridX = 2, gridY = 1, padding = Insets(0, 0, 12, 4))
-        gbAdd(minuteSpinnerWeekly, panel, gridX = 3, gridY = 1, padding = Insets(0, 0, 12, 10))
+        gbAdd(minuteSpinnerWeekly, panel, gridX = minuteColumn, gridY = 1, padding = Insets(0, 0, 12, 10))
 
         gbAdd(
             chkStopWeekly, panel,
@@ -319,9 +325,9 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
             alignment = GridBagConstraints.LINE_END,
             padding = Insets(0, 10, 12, 8)
         )
-        gbAdd(stopHourSpinnerWeekly, panel, gridX = 1, gridY = 3, padding = Insets(0, 0, 12, 4))
+        gbAdd(stopHourSpinnerWeekly, panel, gridX = hourColumn, gridY = 3, padding = Insets(0, 0, 12, 4))
         gbAdd(lblStopColon, panel, gridX = 2, gridY = 3, padding = Insets(0, 0, 12, 4))
-        gbAdd(stopMinuteSpinnerWeekly, panel, gridX = 3, gridY = 3, padding = Insets(0, 0, 12, 10))
+        gbAdd(stopMinuteSpinnerWeekly, panel, gridX = minuteColumn, gridY = 3, padding = Insets(0, 0, 12, 10))
 
         return panel
     }
