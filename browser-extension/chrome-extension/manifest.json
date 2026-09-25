@@ -1,9 +1,9 @@
 {
-    "name": "XDM Integration Module",
+    "name": "Blazma Get Browser Helper",
     "action": {},
     "manifest_version": 3,
     "version": "3.3",
-    "description": "Download with Xtreme Download Manager.",
+    "description": "Download files and videos with Blazma Get.",
     "host_permissions": [
         "*://*/*"
     ],

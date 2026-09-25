@@ -96,7 +96,7 @@ class DefaultAuthenticator : Authenticator() {
         "The proxy ${key.host}:${key.port} did not accept the credentials saved in Settings."
 
     private fun prompt(isProxy: Boolean, message: String = "$requestingSite  $requestingPrompt"): PasswordAuthentication? {
-        val auth = MessageBox.showAuth("XDM", message, isProxy) ?: return null
+        val auth = MessageBox.showAuth(APP_NAME, message, isProxy) ?: return null
         if (isProxy && auth.remember) rememberProxyCredentials(auth.userName, auth.password)
         return PasswordAuthentication(auth.userName, auth.password.toCharArray())
     }

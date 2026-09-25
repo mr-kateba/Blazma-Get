@@ -25,6 +25,7 @@ class DownloadsPanel : SettingsPanel() {
     private val cmbMaxConn = numberCombo(listOf(1, 2, 4, 8, 16, 32))
     private val cmbSplit = numberCombo(listOf(1, 2, 4, 8, 16, 32, 64))
     private val cmbRetry = numberCombo((1..99).toList())
+    private val tglAutoResume = SettingsToggle()
 
     init {
         layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
@@ -50,6 +51,7 @@ class DownloadsPanel : SettingsPanel() {
                 I8N.text("SETTINGS_SEC_CONNECTION"),
                 settingsRow(I8N.text("MSG_MAX_SPLIT"), I8N.text("MSG_MAX_SPLIT_SUB"), cmbSplit),
                 settingsRow(I8N.text("MSG_MAX_RETRY"), I8N.text("MSG_MAX_RETRY_SUB"), cmbRetry),
+                settingsRow(I8N.text("MSG_AUTO_RESUME"), I8N.text("MSG_AUTO_RESUME_SUB"), tglAutoResume),
             )
         )
 
@@ -84,6 +86,7 @@ class DownloadsPanel : SettingsPanel() {
         cmbMaxConn.selectedItem = config.maxParallelDownloads
         cmbSplit.selectedItem = config.maxSegments
         cmbRetry.selectedItem = config.maxRetries
+        tglAutoResume.isSelected = config.autoResumeOnReconnect
         updateEnabledState()
     }
 
@@ -94,6 +97,7 @@ class DownloadsPanel : SettingsPanel() {
         config.maxParallelDownloads = cmbMaxConn.selectedItem as Int
         config.maxSegments = cmbSplit.selectedItem as Int
         config.maxRetries = cmbRetry.selectedItem as Int
+        config.autoResumeOnReconnect = tglAutoResume.isSelected
     }
 
     override fun getInsets(): Insets = Insets(18, 24, 24, 24)

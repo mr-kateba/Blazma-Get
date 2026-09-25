@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit
  * [launchCommand]).
  */
 object AutoStart {
-    private const val LABEL = "app.xdm.autostart"
+    private const val LABEL = "online.blazma.get.autostart"
     private const val APP_NAME = xdm.app.APP_NAME
 
     private const val WIN_RUN_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    private const val WIN_VALUE_NAME = "XDM"
+    private const val WIN_VALUE_NAME = "BlazmaGet"
 
     private val os = detectOS()
 
@@ -138,7 +138,7 @@ $args
     // --- Linux -------------------------------------------------------------------------------
 
     private fun linuxDesktopFile() =
-        File(System.getProperty("user.home"), ".config/autostart/xdm-app.desktop")
+        File(System.getProperty("user.home"), ".config/autostart/blazma-get.desktop")
 
     private fun linuxDesktopContent(cmd: List<String>): String {
         val exec = cmd.joinToString(" ") { if (it.contains(' ')) "\"$it\"" else it }

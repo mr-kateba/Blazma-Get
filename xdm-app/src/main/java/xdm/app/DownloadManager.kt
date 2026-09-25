@@ -60,6 +60,9 @@ class DownloadManager(
      */
     private val publishCancelled: MutableSet<Long> = ConcurrentHashMap.newKeySet()
     private val activeSessions = ConcurrentHashMap<Long, DownloaderTask>()
+
+    /** Brings back downloads that failed because the connection dropped. See [AutoResume]. */
+    val autoResume = AutoResume(resume = ::resumeQueued, urlOf = ::downloadUrl)
     private val downloadHost = object : DownloadHost {
         override fun onDownloadActivated(id: Long) {
             activeSessions[id]?.let {
@@ -170,6 +173,7 @@ class DownloadManager(
         }
 
         override fun onDownloadSuccess(event: DownloadStatusInfo.FinalInfo) {
+            autoResume.forget(event.id)
             activeSessions.remove(event.id)?.let {
                 // The working folder has served its purpose; leaving it behind would litter the
                 // temp folder with one empty directory per completed download.
@@ -215,9 +219,16 @@ class DownloadManager(
                         appDB.savePausedRecords()
                     }
                 }
+                if (error == DownloadError.NetworkError && !toDelete.contains(id)) {
+                    autoResume.watch(id)
+                }
                 AppContext.app.updateDownloadInView(id)
                 if (toDelete.remove(id)) {
                     deleteAfterStopped(id, it)
+                } else if (autoResume.isWaiting(id)) {
+                    // No error dialog: the row says it is waiting for the network, and the
+                    // progress window comes back by itself once the download resumes.
+                    AppContext.app.hideProgressWindow(id)
                 } else {
                     AppContext.app.showProgressError(id, error)
                 }
@@ -459,6 +470,7 @@ class DownloadManager(
     }
 
     override fun stopDownload(id: Long) {
+        autoResume.forget(id)
         // Also aborts a publish in progress; the bytes stay in temp so resume republishes them.
         publishCancelled.add(id)
         activeSessions[id]?.let {
@@ -475,6 +487,12 @@ class DownloadManager(
     }
 
     override fun resumeDownload(id: Long) {
+        autoResume.forget(id)
+        resumeQueued(id)
+    }
+
+    /** Queues [id] to run again; also the path [AutoResume] takes, which keeps its attempt count. */
+    private fun resumeQueued(id: Long) {
         activeSessions[id]?.let {
             Logger.info("Attempt made to resume already running download: $id")
             return
@@ -576,6 +594,7 @@ class DownloadManager(
     }
 
     override fun deleteDownload(id: Long, fromDisk: Boolean) {
+        autoResume.forget(id)
         try {
             val rec = appDB.getById(id) ?: return
             // Under the queue lock so a queued download cannot be launched while it is deleted.
@@ -805,6 +824,10 @@ class DownloadManager(
         AppContext.app.addDownloadInView(task.id)
         enqueue(task.id, resume = false)
     }
+
+    /** The address a download fetches from, whatever its type. */
+    private fun downloadUrl(id: Long): String? =
+        taskInfoDB.getHttpTask(id)?.url ?: taskInfoDB.getHlsTask(id)?.url ?: taskInfoDB.getDashTask(id)?.url
 
     override fun getOriginPage(id: Long): String? {
         taskInfoDB.getHttpTask(id)?.let {

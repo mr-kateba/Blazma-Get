@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Builds a self-contained XDM bundle (trimmed JRE + app) on Windows.
+  Builds a self-contained Blazma Get bundle (trimmed JRE + app) on Windows.
 .DESCRIPTION
   PowerShell counterpart of packaging/build-bundle.sh. Requires JDK 17+ (21+
   recommended) and Maven on PATH. For msi/exe output, WiX v3 must be installed.
@@ -61,8 +61,8 @@ $JavaOptions = @(
   '-Djdk.nio.maxCachedBufferSize=262144'
 )
 
-$AppName    = 'XDM'
-$Vendor     = 'Xtreme Download Manager'
+$AppName    = 'BlazmaGet'
+$Vendor     = 'Blazma'
 $MainClass  = 'xdm.app.AppMain'
 $MainJar    = 'xdm-app.jar'
 $BuildDir   = Join-Path $ProjectRoot 'build'
@@ -122,13 +122,13 @@ if ([int]$specVersion -ge 22) { $JavaOptions += '--enable-native-access=ALL-UNNA
 if ([int]$specVersion -ge 25) { $JavaOptions += '-XX:+UseCompactObjectHeaders' }
 foreach ($o in $JavaOptions) { $args += @('--java-options', $o) }
 
-$icon = Join-Path $PSScriptRoot 'icons\xdm.ico'
+$icon = Join-Path $PSScriptRoot 'icons\blazma-get.ico'
 if (Test-Path $icon) { $args += @('--icon', $icon) }
 if ($Type -ne 'app-image') {
   $args += @(
     '--win-menu', '--win-menu-group', $AppName, '--win-shortcut'
     '--win-dir-chooser', '--win-per-user-install'
-    '--win-upgrade-uuid', '6f9619ff-8b86-d011-b42d-00c04fc964ff'
+    '--win-upgrade-uuid', 'a12ca387-15d1-4c11-af72-8a2856ced1de'
   )
 }
 

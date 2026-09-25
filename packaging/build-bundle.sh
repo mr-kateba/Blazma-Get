@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Builds a self-contained XDM bundle (trimmed JRE + app) with jlink/jpackage.
+# Builds a self-contained Blazma Get bundle (trimmed JRE + app) with jlink/jpackage.
 #
 # Works on macOS, Linux and Windows (Git Bash / MSYS2). See --help.
 #
@@ -80,12 +80,12 @@ JAVA_OPTIONS=(
   -Djdk.nio.maxCachedBufferSize=262144
 )
 
-APP_NAME="XDM"
-VENDOR="Xtreme Download Manager"
-DESCRIPTION="Xtreme Download Manager"
+APP_NAME="BlazmaGet"
+VENDOR="Blazma"
+DESCRIPTION="Blazma Get - free and open source download manager"
 MAIN_CLASS="xdm.app.AppMain"
 MAIN_JAR="xdm-app.jar"
-COPYRIGHT="Copyright (c) Subhra Das Gupta"
+COPYRIGHT="Copyright (c) Blazma, based on XDM by Subhra Das Gupta (GPL-2.0)"
 
 BUILD_DIR="$PROJECT_ROOT/build"
 RUNTIME_DIR="$BUILD_DIR/runtime"
@@ -206,23 +206,23 @@ for opt in "${JAVA_OPTIONS[@]}"; do ARGS+=(--java-options "$opt"); done
 ICON_DIR="$PROJECT_ROOT/packaging/icons"
 case "$OS" in
   mac)
-    [[ -f "$ICON_DIR/xdm.icns" ]] && ARGS+=(--icon "$ICON_DIR/xdm.icns")
-    ARGS+=(--mac-package-identifier com.xtremedownloadmanager.xdm
+    [[ -f "$ICON_DIR/blazma-get.icns" ]] && ARGS+=(--icon "$ICON_DIR/blazma-get.icns")
+    ARGS+=(--mac-package-identifier online.blazma.get
            --mac-package-name "$APP_NAME")
     ;;
   linux)
-    [[ -f "$ICON_DIR/xdm.png" ]] && ARGS+=(--icon "$ICON_DIR/xdm.png")
+    [[ -f "$ICON_DIR/blazma-get.png" ]] && ARGS+=(--icon "$ICON_DIR/blazma-get.png")
     ARGS+=(--linux-shortcut
            --linux-menu-group "Network"
            --linux-app-category "net"
-           --linux-package-name "xdm")
+           --linux-package-name "blazma-get")
     ;;
   windows)
-    [[ -f "$ICON_DIR/xdm.ico" ]] && ARGS+=(--icon "$ICON_DIR/xdm.ico")
+    [[ -f "$ICON_DIR/blazma-get.ico" ]] && ARGS+=(--icon "$ICON_DIR/blazma-get.ico")
     if [[ "$PKG_TYPE" != "app-image" ]]; then
       ARGS+=(--win-menu --win-menu-group "$APP_NAME" --win-shortcut
              --win-dir-chooser --win-per-user-install
-             --win-upgrade-uuid 6f9619ff-8b86-d011-b42d-00c04fc964ff)
+             --win-upgrade-uuid a12ca387-15d1-4c11-af72-8a2856ced1de)
     fi
     ;;
 esac

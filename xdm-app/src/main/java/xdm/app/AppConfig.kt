@@ -83,6 +83,8 @@ interface IAppConfig : CoreConfig {
     var ignoreCertErrors: Boolean
     /** Seconds without data before a connection's read times out and is retried (Advanced settings). */
     override var readTimeoutSeconds: Int
+    /** Resume downloads that failed on a dropped connection once the network is back. */
+    var autoResumeOnReconnect: Boolean
     fun applyAuthConfig()
 }
 
@@ -163,6 +165,7 @@ class AppConfig(private val configDir: String) : IAppConfig {
     override var virusScannerArgs: String = ""
     override var ignoreCertErrors: Boolean = false
     override var readTimeoutSeconds: Int = CoreConfig.DEFAULT_READ_TIMEOUT_SECONDS
+    override var autoResumeOnReconnect: Boolean = true
 
     override fun applyAuthConfig() {
         Authenticator.setDefault(DefaultAuthenticator())
@@ -224,6 +227,7 @@ class AppConfig(private val configDir: String) : IAppConfig {
         // Appended after the self-contained category block so an older build, which stops
         // reading here, is unaffected.
         out.writeInt(downloadCompleteNotification.ordinal)
+        out.writeBoolean(autoResumeOnReconnect)
     }
 
     private fun load(input: DataInputStream) {
@@ -310,6 +314,8 @@ class AppConfig(private val configDir: String) : IAppConfig {
         if (!categoriesRead) return
         runCatching { DownloadCompleteNotification.entries[input.readInt()] }
             .onSuccess { downloadCompleteNotification = it }
+            .onFailure { return }
+        runCatching { input.readBoolean() }.onSuccess { autoResumeOnReconnect = it }
     }
 
     private fun writeCategories(out: DataOutputStream, list: List<DownloadCategory>) {

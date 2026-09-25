@@ -366,6 +366,13 @@ class MainListViewRow(
                     )
                 }
                 prg.isVisible = true
+            } else if (ent.status == RecordStatus.PAUSED && AppContext.downloader.autoResume.isWaiting(ent.id)) {
+                prgText = if (ent.progress > 0) {
+                    String.format("%s %d%s", text("STAT_WAITING_NETWORK"), ent.progress, "%")
+                } else {
+                    text("STAT_WAITING_NETWORK")
+                }
+                prg.isVisible = false
             } else if (ent.status == RecordStatus.PAUSED) {
                 prgText = if (ent.progress > 0) {
                     String.format("%s %d%s", text("STAT_PAUSED"), ent.progress, "%")

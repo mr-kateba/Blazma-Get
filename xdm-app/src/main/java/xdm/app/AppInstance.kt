@@ -246,7 +246,7 @@ class AppInstance : IAppInstance {
     private fun showRefreshWindowInternal(id: Long) {
         val url = AppContext.downloader.getOriginPage(id)
         if (url == null) {
-            MessageBox.show(appWindow, "XDM", text("ERR_NO_REFRESH"))
+            MessageBox.show(appWindow, APP_NAME, text("ERR_NO_REFRESH"))
             return
         }
         AppContext.refreshLinkId.set(id)

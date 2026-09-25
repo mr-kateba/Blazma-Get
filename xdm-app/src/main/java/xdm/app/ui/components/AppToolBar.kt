@@ -1,6 +1,7 @@
 package xdm.app.ui.components
 
 import com.formdev.flatlaf.FlatClientProperties
+import xdm.app.APP_HOME_PAGE
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.ui.screens.AboutDialog
@@ -20,6 +21,7 @@ import javax.swing.JComponent
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
 import javax.swing.JTextField
+import javax.swing.JToggleButton
 import javax.swing.JToolBar
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
@@ -37,6 +39,7 @@ class AppToolBar(
     private val btnSettings: JButton
     private val btnClear: JButton
     private val btnMenu: JButton
+    private val btnSpeed = JToggleButton()
     private val btnDelete: JButton
     private val toolbar = JToolBar()
     private val btnNewGap: Component
@@ -82,6 +85,19 @@ class AppToolBar(
         this.btnSettingsGap = Box.createRigidArea(Dimension(5, 0))
         this.btnSettings.addActionListener { showSettings() }
 
+        btnSpeed.apply {
+            name = "TOOL_SPEED_LIMIT"
+            iconTextGap = 10
+            margin = Insets(5, 5, 5, 5)
+            toolTipText = text("TOOL_SPEED_TIP")
+            addActionListener {
+                AppContext.config.speedLimiterEnabled = isSelected
+                AppContext.config.save()
+                refreshSpeedButton()
+            }
+        }
+        refreshSpeedButton()
+
         this.btnMenu = createToolButton(RemixIcon.MENU_LINE, Color.gray)
         btnMenu.addActionListener {
             showMenu(btnMenu, contextMenu)
@@ -96,6 +112,8 @@ class AppToolBar(
             add(btnSortGap)
             add(btnSettings)
             add(btnSettingsGap)
+            add(btnSpeed)
+            add(Box.createRigidArea(Dimension(5, 0)))
             add(btnDelete)
             add(btnDeleteGap)
             add(Box.createHorizontalGlue())
@@ -193,13 +211,9 @@ class AppToolBar(
 
                 }
 
-                "MENU_UPDATE" -> {
+                "MENU_UPDATE" -> browse("$APP_HOME_PAGE/releases/latest")
 
-                }
-
-                "MENU_HELP_SUP" -> {
-
-                }
+                "MENU_HELP_SUP" -> browse("$APP_HOME_PAGE/issues")
 
                 "MENU_ABOUT" -> {
                     AboutDialog(SwingUtilities.windowForComponent(toolbar)).isVisible = true
@@ -214,12 +228,37 @@ class AppToolBar(
 
     private fun showSettings() {
         SettingsWindow(SwingUtilities.windowForComponent(toolbar)).apply {
-            onSaved = settingsSavedCallback
+            onSaved = {
+                settingsSavedCallback()
+                refreshSpeedButton()
+            }
             isModal = true
             setLocationRelativeTo(parent)
             loadConfig()
             isVisible = true
         }
+    }
+
+    /**
+     * The quick speed-limit switch: lets the user stop a download from eating the whole home
+     * connection without opening Settings. The limit itself is set in Settings > Downloads.
+     */
+    private fun refreshSpeedButton() {
+        val config = AppContext.config
+        val on = config.speedLimiterEnabled && config.speedLimit > 0
+        btnSpeed.isSelected = on
+        btnSpeed.text = if (on) text("TOOL_SPEED_ON").format(formatKbps(config.speedLimit)) else text("TOOL_SPEED_OFF")
+        btnSpeed.icon = createIcon(
+            RemixIcon.SPEED_LINE, 16,
+            if (on) UIManager.getColor("Component.accentColor") ?: Color.ORANGE else Color.gray
+        )
+    }
+
+    private fun formatKbps(kb: Int): String =
+        if (kb >= 1024) String.format("%.1f MB/s", kb / 1024.0) else "$kb KB/s"
+
+    private fun browse(url: String) {
+        runCatching { java.awt.Desktop.getDesktop().browse(java.net.URI(url)) }
     }
 
     val component: Component

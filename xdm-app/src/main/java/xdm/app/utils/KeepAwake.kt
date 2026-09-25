@@ -60,7 +60,7 @@ object KeepAwake {
             OS.Linux -> listOf(
                 "systemd-inhibit",
                 "--what=idle:sleep",
-                "--who=XDM",
+                "--who=Blazma Get",
                 "--why=Download in progress",
                 "--mode=block",
                 "cat"
