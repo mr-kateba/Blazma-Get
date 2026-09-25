@@ -318,11 +318,18 @@ class HttpDownloaderTask : ChunkController {
     }
 
     private fun startChunks() {
-        val chunks = context.chunks.values.filter { it.status.get() != ChunkStatus.Finished }.map { it.id }
-        for (chunk in chunks) {
-            context.chunks[chunk]?.let {
-                it.status.set(ChunkStatus.Downloading)
-                startChunk(chunk)
+        // Under the write lock: a chunk that connects while this loop runs calls splitChuck, which
+        // restarts Failed chunks (retryFailedChunk). Unlocked, it could restart a chunk this loop is
+        // about to start, and two threads would download the same range. Both advance `downloaded`,
+        // so the chunk skips ahead of the bytes on disk and the finished file has a hole of zeros.
+        // This hit every resume after a network error, where all chunks are restored as Failed.
+        context.write {
+            val chunks = context.chunks.values.filter { it.status.get() != ChunkStatus.Finished }.map { it.id }
+            for (chunk in chunks) {
+                context.chunks[chunk]?.let {
+                    it.status.set(ChunkStatus.Downloading)
+                    startChunk(chunk)
+                }
             }
         }
     }
