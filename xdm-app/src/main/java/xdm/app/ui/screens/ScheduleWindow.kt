@@ -334,6 +334,8 @@ class ScheduleWindow(parent: Window, private val downloadId: Long) :
 
     /** Force the spinner text field to show exactly 2 characters wide. */
     private fun styleTimeSpinner(spinner: JSpinner) {
+        // Two digits, like a clock: 02:00 rather than 2:0.
+        spinner.editor = JSpinner.NumberEditor(spinner, "00")
         (spinner.editor as JSpinner.DefaultEditor).textField.columns = 2
     }
 

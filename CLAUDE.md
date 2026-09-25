@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Blazma Get
+
+This repository is **Blazma Get**, a fork of XDM's Kotlin `dev` branch (GPL-2.0) with an Arabic,
+right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream changes merge cleanly
+(`git remote add upstream https://github.com/subhra74/xdm.git`, branch `dev`). Additions:
+
+- `UiLocale.kt`: first-run language, global RTL orientation (`mirror`, `keepLtr`), Latin digits,
+  bundled IBM Plex Sans Arabic font, `ltr()` for Latin runs (sizes, speeds) inside Arabic text.
+  New layouts must use relative constraints (LINE_START/END, LEADING/TRAILING, PAGE/LINE_AXIS).
+- `AutoResume.kt`: resumes downloads that failed with `NetworkError` once the server is reachable.
+- Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
+- Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
+
 ## Overview
 
 XDM (Xtreme Download Manager) is a desktop download manager. It is a Maven multi-module

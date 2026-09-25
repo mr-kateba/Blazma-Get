@@ -28,7 +28,10 @@ Set-Location $ProjectRoot
 # JDK modules the app actually needs - see the comment block in build-bundle.sh
 # for how this list was derived and what was deliberately left out.
 $Modules = 'java.desktop,java.logging,jdk.crypto.ec,jdk.unsupported'
-if ($WithLocales) { $Modules += ',jdk.localedata' }
+# Locale data only for the UI languages (Arabic month names, etc.): a few MB instead of ~15.
+# -WithLocales keeps every locale.
+$Modules += ',jdk.localedata'
+$LocaleArgs = if ($WithLocales) { @() } else { @('--include-locales=en,ar,de,tr,fr,ru,zh,sr,pt,id,es,cs,fa,it,ko,pl,ro,vi,ml,ne,hu,uk') }
 
 # JVM tuning flags baked into the launcher. See the comment block in
 # build-bundle.sh for the measurements behind this set: SerialGC keeps
@@ -96,7 +99,7 @@ if (-not $AppVersion) { $AppVersion = '1.0.0' }
 Write-Host ">> jlink runtime: $Modules"
 Remove-Item -Recurse -Force $RuntimeDir, $InputDir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $InputDir, $DestDir | Out-Null
-& jlink --add-modules $Modules --strip-debug --no-header-files --no-man-pages `
+& jlink --add-modules $Modules @LocaleArgs --strip-debug --no-header-files --no-man-pages `
         --compress=$compress --output $RuntimeDir
 if ($LASTEXITCODE -ne 0) { throw 'jlink failed' }
 
@@ -132,6 +135,8 @@ if ($Type -ne 'app-image') {
   )
 }
 
+# jpackage refuses to overwrite an earlier app image.
+if ($Type -eq 'app-image') { Remove-Item -Recurse -Force (Join-Path $DestDir $AppName) -ErrorAction SilentlyContinue }
 Write-Host ">> jpackage --type $Type (windows, version $AppVersion)"
 & jpackage @args
 if ($LASTEXITCODE -ne 0) { throw 'jpackage failed' }

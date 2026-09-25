@@ -1,79 +1,161 @@
-**As of 2026 this project is in active development**
+<p align="center">
+  <img src="branding/logo.svg" width="128" alt="Blazma Get logo">
+</p>
 
-<p id="downloads" align="center">
-	<img src="https://i.stack.imgur.com/TOfqL.png" height="120px"/>
-	<h1 align="center">Xtreme Download Manager</h1>
+<h1 align="center">Blazma Get</h1>
+
+<p align="center">
+  مدير تحميل مجاني ومفتوح المصدر بواجهة عربية، بديل لـ IDM بدون كراك وبدون فيروسات<br>
+  A free, open-source download manager with a native Arabic interface
 </p>
 
 <p align="center">
-	<a href="https://github.com/subhra74/xdm/workflows/Java%20CI/badge.svg?branch=master"><img src="https://github.com/subhra74/xdm/workflows/Java%20CI/badge.svg?branch=master" alt="Java CI" /></a>
-	<a href="https://camo.githubusercontent.com/278e057571a0481121b2d60490ff656fb8736a20/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f646f776e6c6f6164732f73756268726137342f78646d2f746f74616c2e737667"><img src="https://img.shields.io/github/downloads/subhra74/xdm/total.svg" alt="Github All Releases" /></a>
+  <a href="https://github.com/mr-kateba/Blazma-Get/releases/latest"><img src="https://img.shields.io/github/v/release/mr-kateba/Blazma-Get?label=%D8%A7%D9%84%D8%A5%D8%B5%D8%AF%D8%A7%D8%B1%20%7C%20release&color=FF6D00" alt="release"></a>
+  <a href="https://github.com/mr-kateba/Blazma-Get/actions/workflows/build.yml"><img src="https://github.com/mr-kateba/Blazma-Get/actions/workflows/build.yml/badge.svg" alt="build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--2.0-blue" alt="GPL-2.0"></a>
+  <a href="https://github.com/mr-kateba/Blazma-Get/releases"><img src="https://img.shields.io/github/downloads/mr-kateba/Blazma-Get/total?color=FFB300&label=%D8%A7%D9%84%D8%AA%D8%AD%D9%85%D9%8A%D9%84%D8%A7%D8%AA%20%7C%20downloads" alt="downloads"></a>
 </p>
 
-### [XDM Homepage](https://xtremedownloadmanager.com/ "XDM Homepage") ###
+<p align="center">
+  <a href="#العربية">العربية</a> · <a href="#english">English</a>
+</p>
 
-**X**treme **D**ownload **M**anager (XDM) is a powerful tool to increase download speeds up to 500%, save videos from popular video streaming websites, resume broken/dead downloads, schedule and convert downloads.<br>
-XDM seamlessly integrates with Google Chrome, Mozilla Firefox Quantum, Opera, Vivaldi and other Chroumium and Firefox based browsers, to take over downloads and saving streaming videos from web. XDM has a built in video converter which lets you convert your downloaded videos to different formats so that you can watch them on your mobile or TV (100+ devices are supported)
+---
 
-[![name](https://subhra74.github.io/xdm/download.png)](https://xtremedownloadmanager.com/#downloads)
+<div dir="rtl">
 
-## Screenshots
+## العربية
 
-| Main window | New download | Download progress |
-|---|---|---|
-| ![XDM main window with the downloads list][01] | ![New download dialog][02] | ![Download progress window][03] |
+أغلب الناس يستخدمون IDM مكرك، والكراكات هي أسهل طريق للفيروسات. **Blazma Get** مجاني بالكامل ومفتوح المصدر، وتقدر تشوف كوده بنفسك. واجهته عربية من اليمين لليسار، وهو من أدوات [متجر بلازما](https://blazma.online).
 
+<p align="center">
+  <img src="docs/screenshots/main-ar.png" width="720" alt="الواجهة الرئيسية">
+</p>
 
+### ✨ المميزات
 
-## Features
-- Download files at maximum possible speed (5-6 times faster than conventional downloaders).
-- XDM can save video from numerous video streaming sites.
-- Works with all modern browsers on Windows, Linux and Mac OS X. XDM supports [Google Chrome][18], [Chromium][18], [Firefox Quantum][19], [Vivaldi][20], [Edge][21] and many other popular browsers.
-- XDM has built in video converter, which lets you convert downloaded video to MP3 and MP4 formats.
-- Supports `HTTP`, `HTTPS`, `FTP` as well as video streaming protocols like `MPEG-DASH`, `Apple HLS`, and `Adobe HDS`.
-- XDM also supports authentication, proxy servers, cookies, redirection etc.
-- Video download, clipboard monitoring, automatic antivirus checking, scheduler, system shutdown on download completion.
-- Resumes broken / dead downloads caused by connection problem, power failure or session expiration.
-- Works with Windows ISA, auto proxy scripts, proxy servers, NTLM, Kerberos authentication.
+- 🇸🇦 **واجهة عربية بالكامل** من اليمين لليسار، بخط عربي واضح (IBM Plex Sans Arabic)، وتقدر تغيّرها للإنجليزي أو أكثر من 20 لغة ثانية من الإعدادات
+- ⚡ **تحميل أسرع** لأنه يقسّم الملف لعدة أجزاء ويحمّلها مع بعض
+- 🔌 **يكمّل لحاله لما يرجع النت**: إذا انقطع الاتصال، التحميل ينتظر ويكمل من نفس المكان أول ما يرجع النت، بدون ما تسوي شي
+- 🐢 **تحديد السرعة بضغطة** من الشريط العلوي، عشان التحميل ما ياكل النت على باقي البيت
+- 🌙 **جدولة التحميل**: خلّه يبدأ الساعة 2 بالليل لما النت يكون أسرع، ويوقف الساعة 7 الصبح، مرة وحدة أو كل أسبوع
+- 🔔 **إشعار لما يخلص التحميل** (نافذة، أو إشعار من ويندوز، أو بدون)
+- 🎬 **تحميل الفيديو** من المواقع اللي تدعم HLS وDASH، ويلتقط التحميلات من المتصفح (Chrome، Edge، Firefox، Brave وغيرها)
+- 🗂️ **ترتيب تلقائي**: البرامج والفيديو والصوتيات والملفات المضغوطة، كل نوع في مجلده
+- 🔒 **بدون إعلانات، بدون تتبع، بدون كراك**
 
-## Building from source
-<pre>
-This is a standard maven project.
-If you have configured Java and Maven use: <b>mvn clean install</b> to build the project.
-The jar will be created in target directory.
-</pre>
+### 📸 صور من البرنامج
 
-## Submitting translations
-If you want to translate XDM to your language, feel free to submit a translation file.<br>
-Steps are mentioned in: https://github.com/subhra74/xdm/wiki/Submitting-translations-for-XDM
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/progress-ar.png" alt="نافذة التقدم"><br>نافذة التقدم</td>
+    <td align="center"><img src="docs/screenshots/schedule-ar.png" alt="الجدولة"><br>الجدولة: كل خميس وجمعة وسبت من 2 بالليل لين 7 الصبح</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/settings-ar.png" alt="الإعدادات"><br>تحديد السرعة والتكملة التلقائية</td>
+    <td align="center"><img src="docs/screenshots/main-en.png" alt="English"><br>الواجهة بالإنجليزي</td>
+  </tr>
+</table>
 
+### 🚀 التثبيت
 
-[//]: #ImageLinks
-[01]: screenshots/img1.png
-[02]: screenshots/img2.png
-[03]: screenshots/img3.png
-[04]: https://i.stack.imgur.com/aFyH5.png
-[05]: https://i.stack.imgur.com/lmAr6.png
-[06]: https://i.stack.imgur.com/H4yMj.png
-[07]: https://i.stack.imgur.com/8ulBq.png
-[08]: https://i.stack.imgur.com/Gfgae.jpg
-[09]: https://i.stack.imgur.com/GlVDC.png
+1. من صفحة [**آخر إصدار**](https://github.com/mr-kateba/Blazma-Get/releases/latest) نزّل **`BlazmaGet-Setup-….exe`**
+2. شغّله وكمّل خطوات التثبيت (ما يحتاج صلاحيات مسؤول، وما يحتاج تثبّت Java لأنها موجودة داخله)
+3. لو طلع لك "Windows protected your PC" اضغط **More info** ثم **Run anyway** (يطلع لأن البرنامج جديد وغير موقّع، مو لأن فيه شي)
 
-[//]: #DownloadLinks
-[10]: https://github.com/subhra74/xdm/releases/download/7.2.10/xdmsetup.msi
-[11]: https://github.com/subhra74/xdm/releases/download/7.2.10/xdm-setup-7.2.10.tar.xz
-[12]: #
-[13]: https://github.com/subhra74/xdm/releases/download/7.2.10/xdman.jar
-[14]: https://sourceforge.net/projects/xdman/files/xdmsetup-2018.msi/download
-[15]: https://sourceforge.net/projects/xdman/files/xdm-2018-x64.tar.xz/download
-[16]: https://sourceforge.net/projects/xdman/files/XDMSetup.dmg/download
-[17]: http://xdman.sourceforge.net/xdman.jar
-[100]: https://github.com/subhra74/xdm/releases/download/7.2.11/xdm-setup.msi
-[101]: https://github.com/subhra74/xdm/releases/download/7.2.11/xdm-setup-7.2.11.tar.xz
-[102]: https://github.com/subhra74/xdm/releases/download/7.2.11/xdman.jar
+| الملف | لمين؟ |
+|---|---|
+| `BlazmaGet-Setup-….exe` | ويندوز 10 و11 (**مستحسن**) |
+| `BlazmaGet-Portable-….zip` | ويندوز بدون تثبيت: فك الضغط وشغّل `BlazmaGet.exe` |
+| `blazma-get_…_amd64.deb` | لينكس (Ubuntu وDebian) |
+| `BlazmaGet-….jar` | أي نظام فيه Java 11 أو أحدث |
 
-[//]: #AddonLinks
-[18]: https://chrome.google.com/webstore/detail/xtreme-download-manager/dkckaoghoiffdbomfbbodbbgmhjblecj
-[19]: https://addons.mozilla.org/en-US/firefox/addon/xdm-browser-monitor/
-[20]: #
-[21]: https://sourceforge.net/p/xdman/blog/2018/01/xdm-integration-with-microsoft-edge/
+### 🧩 ربطه بالمتصفح
+
+عشان يلتقط التحميلات والفيديوهات من المتصفح:
+
+1. من صفحة الإصدار نزّل `BlazmaGet-Chrome-Extension.zip` وفك الضغط
+2. افتح `chrome://extensions` (أو `edge://extensions`) وفعّل **وضع المطوّر** (Developer mode)
+3. اضغط **Load unpacked** واختر المجلد اللي فكّيته
+4. خلّ Blazma Get شغّال، وأي تحميل من المتصفح بيروح له مباشرة
+
+### 🛠️ للمطوّرين
+
+المشروع مبني بـ Kotlin وSwing (FlatLaf). تحتاج **JDK 21** و**Maven**:
+
+```bash
+mvn clean package                          # يطلع xdm-app/target/xdm-app.jar
+java -jar xdm-app/target/xdm-app.jar       # تشغيل
+mvn test -DskipTests=false                 # الاختبارات
+```
+
+ملف التثبيت لويندوز: `packaging\build-bundle.ps1 -Type app-image` ثم [Inno Setup](https://jrsoftware.org/isinfo.php) على `packaging\windows\BlazmaGet.iss`. وكل هذا يسويه [GitHub Actions](.github/workflows/build.yml) تلقائيًا مع كل تحديث، ولما تنشر وسم مثل `v1.0.0` ينزل الإصدار مع ملفاته.
+
+- النصوص العربية: `xdm-app/src/main/resources/lang/ar.txt`
+- الاتجاه من اليمين لليسار والخط: `xdm-app/src/main/java/xdm/app/UiLocale.kt`
+- التكملة التلقائية لما يرجع النت: `xdm-app/src/main/java/xdm/app/AutoResume.kt`
+
+### ❤️ شكر وتقدير
+
+Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.com/subhra74/xdm) للمطوّر **Subhra Das Gupta**، ومنشور بنفس الترخيص [GPL-2.0](LICENSE). الكود مفتوح للجميع، وأي أحد يقدر يساهم فيه.
+
+</div>
+
+---
+
+## English
+
+**Blazma Get** is a free, open-source download manager: a friendly alternative to cracked copies of IDM, which are one of the most common ways people end up with malware. It is built on [Xtreme Download Manager](https://github.com/subhra74/xdm) and adds a native right-to-left Arabic interface, the Blazma look, and a few features people ask for all the time.
+
+<p align="center">
+  <img src="docs/screenshots/main-en.png" width="720" alt="Main window">
+</p>
+
+### Features
+
+- **Arabic and English** (plus 20+ community translations), with a real right-to-left layout and a clear Arabic font
+- **Faster downloads** through multiple connections per file
+- **Resumes on its own when the internet comes back**: a download that drops with the connection waits and picks up where it stopped
+- **One-click speed limit** in the toolbar, so one download does not eat the whole home connection
+- **Scheduler**: start at 2 AM when the line is faster, stop at 7 AM; once or weekly
+- **Completion notice**: a dialog, a system notification, or nothing
+- **Video downloads** (HLS, DASH) and browser integration for Chrome, Edge, Firefox, Brave and more
+- **Automatic categories** for programs, videos, music, archives and documents
+- No ads, no tracking
+
+<p align="center">
+  <img src="docs/screenshots/progress-en.png" width="600" alt="Download progress">
+</p>
+
+### Install
+
+Get the latest files from the [**Releases page**](https://github.com/mr-kateba/Blazma-Get/releases/latest):
+
+| File | For |
+|---|---|
+| `BlazmaGet-Setup-….exe` | Windows 10/11 installer (**recommended**, Java included) |
+| `BlazmaGet-Portable-….zip` | Windows, no install: unzip and run `BlazmaGet.exe` |
+| `blazma-get_…_amd64.deb` | Debian / Ubuntu |
+| `BlazmaGet-….jar` | Any OS with Java 11+ |
+| `BlazmaGet-Chrome-Extension.zip` | Browser integration: load it unpacked from `chrome://extensions` |
+
+The installer is not code-signed yet, so Windows SmartScreen may warn about it: click **More info**, then **Run anyway**.
+
+### Build from source
+
+Requires **JDK 21** and **Maven**.
+
+```bash
+mvn clean package                          # builds xdm-app/target/xdm-app.jar
+java -jar xdm-app/target/xdm-app.jar       # runs the app
+mvn test -DskipTests=false                 # runs the tests
+```
+
+Every push is built and tested by [GitHub Actions](.github/workflows/build.yml); pushing a tag such as `v1.0.0` publishes a release with the Windows installer, a portable zip, a `.deb`, the jar and the browser extension.
+
+### Credits and license
+
+- Based on [Xtreme Download Manager](https://github.com/subhra74/xdm) by Subhra Das Gupta
+- Licensed under the [GNU General Public License v2.0](LICENSE), like XDM
+- Arabic UI font: [IBM Plex Sans Arabic](https://github.com/IBM/plex) (SIL Open Font License)
+- Icons: [Remix Icon](https://remixicon.com)

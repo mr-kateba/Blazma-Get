@@ -1,5 +1,6 @@
 package xdm.app.ui.components
 
+import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatClientProperties
 import xdm.app.APP_HOME_PAGE
 import xdm.app.AppContext
@@ -247,7 +248,7 @@ class AppToolBar(
         val config = AppContext.config
         val on = config.speedLimiterEnabled && config.speedLimit > 0
         btnSpeed.isSelected = on
-        btnSpeed.text = if (on) text("TOOL_SPEED_ON").format(formatKbps(config.speedLimit)) else text("TOOL_SPEED_OFF")
+        btnSpeed.text = if (on) text("TOOL_SPEED_ON").format(UiLocale.ltr(formatKbps(config.speedLimit))) else text("TOOL_SPEED_OFF")
         btnSpeed.icon = createIcon(
             RemixIcon.SPEED_LINE, 16,
             if (on) UIManager.getColor("Component.accentColor") ?: Color.ORANGE else Color.gray

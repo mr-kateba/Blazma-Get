@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.utils.chooseFile
@@ -265,7 +266,7 @@ class NewVideoDownloadWindow : JDialog() {
         populateSaveInFolders(modelSaveIn, cmbSaveIn)
         txtFileName.text = FileUtils.sanitizeFileName(fileName)
         fileSize?.let {
-            lblFileInfo.text = FormatHelper.formatSize(it.toDouble())
+            lblFileInfo.text = UiLocale.ltr(FormatHelper.formatSize(it.toDouble()))
         }
         this.isVisible = true
     }

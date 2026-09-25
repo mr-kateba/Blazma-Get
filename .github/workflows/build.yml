@@ -1,0 +1,164 @@
+# Builds Blazma Get on every push and pull request, and publishes a GitHub release with the
+# Windows installer when a version tag (v1.2.3) is pushed.
+name: Build
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build and run tests
+        run: mvn -B -ntp clean package -DskipTests=false
+
+      - name: Package the browser extensions
+        run: |
+          (cd browser-extension/chrome-extension && zip -qr ../../BlazmaGet-Chrome-Extension.zip .)
+          (cd browser-extension/firefox-extension && zip -qr ../../BlazmaGet-Firefox-Extension.zip .)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blazma-get-jar
+          path: |
+            xdm-app/target/xdm-app.jar
+            BlazmaGet-Chrome-Extension.zip
+            BlazmaGet-Firefox-Extension.zip
+          if-no-files-found: error
+
+  windows:
+    name: Windows installer
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Set version
+        shell: pwsh
+        run: |
+          $file = 'xdm-app/src/main/resources/app-version.json'
+          $json = Get-Content $file -Raw | ConvertFrom-Json
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $json.currentVersion = $env:GITHUB_REF_NAME.TrimStart('v')
+            $json | ConvertTo-Json | Set-Content $file -Encoding utf8
+          }
+          "APP_VERSION=$($json.currentVersion)" >> $env:GITHUB_ENV
+
+      - name: Build app image (app + trimmed Java runtime)
+        shell: pwsh
+        run: ./packaging/build-bundle.ps1 -Type app-image
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          & $iscc "/DAppVersion=$env:APP_VERSION" packaging\windows\BlazmaGet.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup failed' }
+
+      - name: Portable zip
+        shell: pwsh
+        run: Compress-Archive -Path build\dist\BlazmaGet -DestinationPath "build\installer\BlazmaGet-Portable-$env:APP_VERSION.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blazma-get-windows
+          path: build/installer/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux package
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Set version
+        if: github.ref_type == 'tag'
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          sed -i "s/\"currentVersion\": *\"[^\"]*\"/\"currentVersion\": \"$version\"/" xdm-app/src/main/resources/app-version.json
+
+      - name: Build .deb
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fakeroot
+          bash packaging/build-bundle.sh -t deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blazma-get-linux
+          path: build/dist/*.deb
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    if: github.ref_type == 'tag'
+    needs: [test, windows, linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      # The jar artifact keeps its xdm-app/target/ path (it was uploaded with the extension zips).
+      - name: Name the jar
+        run: |
+          mv dist/xdm-app/target/xdm-app.jar "dist/BlazmaGet-${GITHUB_REF_NAME#v}.jar"
+          rm -rf dist/xdm-app
+          ls -la dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Blazma Get ${{ github.ref_name }}
+          generate_release_notes: true
+          body: |
+            ## تحميل / Download
+
+            | | |
+            |---|---|
+            | **ويندوز (مستحسن)** · Windows (recommended) | `BlazmaGet-Setup-*.exe` |
+            | ويندوز بدون تثبيت · Windows portable | `BlazmaGet-Portable-*.zip` |
+            | لينكس · Linux (Debian/Ubuntu) | `blazma-get_*.deb` |
+            | أي نظام فيه Java 11+ · Any OS with Java 11+ | `BlazmaGet-*.jar` |
+            | إضافة المتصفح · Browser extension | `BlazmaGet-Chrome-Extension.zip` |
+
+            لو طلع لك "Windows protected your PC" اضغط **More info** ثم **Run anyway**.
+            If Windows SmartScreen appears, click **More info** then **Run anyway**.
+          files: dist/*

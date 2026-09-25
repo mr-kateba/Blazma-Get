@@ -134,7 +134,12 @@ case "$(uname -s)" in
 esac
 PKG_TYPE="${PKG_TYPE:-app-image}"
 
-[[ $WITH_LOCALES -eq 1 ]] && MODULES="$MODULES,jdk.localedata"
+# Locale data only for the UI languages (Arabic month names, etc.): a few MB instead of ~15.
+# --with-locales keeps every locale.
+LOCALES="en,ar,de,tr,fr,ru,zh,sr,pt,id,es,cs,fa,it,ko,pl,ro,vi,ml,ne,hu,uk"
+MODULES="$MODULES,jdk.localedata"
+LOCALE_ARGS=(--include-locales="$LOCALES")
+[[ $WITH_LOCALES -eq 1 ]] && LOCALE_ARGS=()
 
 # ---- toolchain ------------------------------------------------------------
 for tool in jlink jpackage; do
@@ -166,6 +171,7 @@ if jlink --help 2>&1 | grep -q -- '--strip-native-debug-symbols'; then
 fi
 jlink \
   --add-modules "$MODULES" \
+  ${LOCALE_ARGS+"${LOCALE_ARGS[@]}"} \
   --strip-debug \
   ${STRIP_NATIVE+"${STRIP_NATIVE[@]}"} \
   --no-header-files \
@@ -212,10 +218,14 @@ case "$OS" in
     ;;
   linux)
     [[ -f "$ICON_DIR/blazma-get.png" ]] && ARGS+=(--icon "$ICON_DIR/blazma-get.png")
-    ARGS+=(--linux-shortcut
-           --linux-menu-group "Network"
-           --linux-app-category "net"
-           --linux-package-name "blazma-get")
+    # Installer-only options: jpackage rejects them for a plain app-image.
+    if [[ "$PKG_TYPE" != "app-image" ]]; then
+      ARGS+=(--linux-shortcut
+             --linux-menu-group "Network"
+             --linux-app-category "net"
+             --linux-package-name "blazma-get")
+      [[ "$PKG_TYPE" == "deb" ]] && ARGS+=(--linux-deb-maintainer "mr-kateba@users.noreply.github.com")
+    fi
     ;;
   windows)
     [[ -f "$ICON_DIR/blazma-get.ico" ]] && ARGS+=(--icon "$ICON_DIR/blazma-get.ico")
@@ -227,6 +237,8 @@ case "$OS" in
     ;;
 esac
 
+# jpackage refuses to overwrite an earlier app image.
+[[ "$PKG_TYPE" == "app-image" ]] && rm -rf "$DEST_DIR/$APP_NAME" "$DEST_DIR/$APP_NAME.app"
 echo ">> jpackage --type $PKG_TYPE ($OS, version $APP_VERSION)"
 jpackage "${ARGS[@]}" ${EXTRA_ARGS+"${EXTRA_ARGS[@]}"}
 

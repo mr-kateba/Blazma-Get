@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.I8N.text
 import xdm.app.utils.chooseFile
@@ -246,7 +247,7 @@ class NewDownloadWindow : JDialog() {
             if (selectedFolder != folder) {
                 selectedFolder = folder
                 val freeSpace = File(folder).freeSpace
-                lblFreeSpace.text = "${text("MSG_FREE_SPACE")} ${FormatHelper.formatSize(freeSpace.toDouble())}"
+                lblFreeSpace.text = "${text("MSG_FREE_SPACE")} ${UiLocale.ltr(FormatHelper.formatSize(freeSpace.toDouble()))}"
             }
         }
     }
@@ -441,7 +442,7 @@ class NewDownloadWindow : JDialog() {
             this.txtFileName.text = taskInfo.fileName
             this.originalFileName = taskInfo.fileName
             this.lblFileInfo.text = taskInfo.knownFileSize?.let {
-                FormatHelper.formatSize(it.toDouble())
+                UiLocale.ltr(FormatHelper.formatSize(it.toDouble()))
             } ?: "---"
         }
         this.isVisible = true

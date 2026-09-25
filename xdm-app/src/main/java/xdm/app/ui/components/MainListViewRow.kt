@@ -356,7 +356,7 @@ class MainListViewRow(
         if (ent.status == RecordStatus.FINISHED) {
             lblInfo.text = (formatDateShort(ent.date)
                     + gap
-                    + formatSize(ent.size.toDouble()))
+                    + UiLocale.ltr(formatSize(ent.size.toDouble())))
             lblTitle.text = ent.fileName
             prg.isVisible = false
             lblProgress.text = ""

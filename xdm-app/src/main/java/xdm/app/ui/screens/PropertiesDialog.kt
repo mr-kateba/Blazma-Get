@@ -1,5 +1,6 @@
 package xdm.app.ui.screens
 
+import xdm.app.UiLocale
 import xdm.app.AppContext
 import xdm.app.DbRecord
 import xdm.app.I8N.text
@@ -37,7 +38,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
             DownloadType.Torrent -> "Torrent"
         }
 
-        val sizeText = if (ent.size > 0) FormatHelper.formatSize(ent.size.toDouble()) else text("PROP_UNKNOWN")
+        val sizeText = if (ent.size > 0) UiLocale.ltr(FormatHelper.formatSize(ent.size.toDouble())) else text("PROP_UNKNOWN")
         val dateText = if (ent.date > 0)
             SimpleDateFormat("dd MMM yyyy, hh:mm a").format(Date(ent.date)) else "-"
         val finished = ent.status == RecordStatus.FINISHED
