@@ -34,7 +34,8 @@
 
 ### ✨ المميزات
 
-- 🎨 **تصميم بلازما**: نفس هوية Blazma Boost وموقع بلازما، شريط جانبي بالشعار، بطاقات للتحميلات، تبويبات بعدّاد، وشريط سفلي يعرض السرعة الكلية، بالوضع الداكن والفاتح
+- 🎨 **تصميم بلازما**: نفس شكل Blazma Boost، شريط جانبي بالشعار وأزرار بإطار، بطاقات للتحميلات، تبويبات بعدّاد، وشريط سفلي يعرض السرعة الكلية
+- 🌙 **الوضع الداكن والفاتح بضغطة** من زر القمر فوق، يتغيّر فورًا بدون إعادة تشغيل
 - 🇸🇦 **واجهة عربية بالكامل** من اليمين لليسار، بخط عربي واضح (IBM Plex Sans Arabic)، وتقدر تغيّرها للإنجليزي أو أكثر من 20 لغة ثانية من الإعدادات
 - ⚡ **تحميل أسرع** لأنه يقسّم الملف لعدة أجزاء ويحمّلها مع بعض
 - 🔌 **يكمّل لحاله لما يرجع النت**: إذا انقطع الاتصال، التحميل ينتظر ويكمل من نفس المكان أول ما يرجع النت، بدون ما تسوي شي
@@ -120,7 +121,8 @@ Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.co
 
 ### Features
 
-- **Blazma design**, shared with Blazma Boost and blazma.online: a branded sidebar, download cards, tabs with counts and a status bar with the total speed, in dark and light themes
+- **Blazma design**, matching Blazma Boost: a branded sidebar with outlined keys, download cards, tabs with counts and a status bar with the total speed
+- **Dark and light theme in one click** with the moon button, applied at once without a restart
 - **Arabic and English** (plus 20+ community translations), with a real right-to-left layout and a clear Arabic font
 - **Faster downloads** through multiple connections per file
 - **Resumes on its own when the internet comes back**: a download that drops with the connection waits and picks up where it stopped

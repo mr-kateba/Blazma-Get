@@ -96,7 +96,7 @@ class FilterListPanel(
         catFilterModel.addElement(
             FilterItem.Category(
                 null, text("CAT_ALL_TYPES"),
-                makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), Blazma.muted),
+                makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), Blazma.text),
                 makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), selectedIconColor())
             )
         )
@@ -106,7 +106,7 @@ class FilterListPanel(
             catFilterModel.addElement(
                 FilterItem.Category(
                     cat, cat.displayName,
-                    makeIcon(glyph, Blazma.muted),
+                    makeIcon(glyph, Blazma.text),
                     makeIcon(glyph, selectedIconColor())
                 )
             )
@@ -139,6 +139,14 @@ class FilterListPanel(
      */
     private fun stretchingList(model: DefaultListModel<FilterItem>): JList<FilterItem> =
         object : HoverPillList<FilterItem>(model, FilterListRenderer::pillColor) {
+            override val pillInset = FilterListRenderer.GAP
+
+            override fun paintRowBase(g: java.awt.Graphics2D, index: Int, bounds: Rectangle) {
+                if (index != selectedIndex) {
+                    FilterListRenderer.paintRest(g, bounds.x, bounds.y, bounds.width, bounds.height)
+                }
+            }
+
             override fun getMaximumSize(): Dimension = Dimension(Int.MAX_VALUE, preferredSize.height)
         }.apply { cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR) }
 
@@ -149,7 +157,7 @@ class FilterListPanel(
     private fun selectedIconColor(): Color = Blazma.onAccent
 
     private fun makeIcon(icon: RemixIcon, color: Color): Icon {
-        return createIcon(icon, 20, color)
+        return createIcon(icon, 18, color)
     }
 
     /**

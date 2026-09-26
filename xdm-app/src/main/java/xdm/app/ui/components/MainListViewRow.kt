@@ -433,9 +433,10 @@ class MainListViewRow(
             val y = 5
             val w = width - 32
             val h = height - 10
-            g2.color = if (hoverCard) Blazma.panelHover else Blazma.panel
+            // Blazma Boost's group boxes: the page color inside a soft border, raised under the mouse.
+            g2.color = if (hoverCard) Blazma.panel else Blazma.background
             g2.fillRoundRect(x, y, w, h, 14, 14)
-            g2.color = if (checked) Blazma.accent else Blazma.border
+            g2.color = if (checked) Blazma.accent else Blazma.borderStrong
             g2.drawRoundRect(x, y, w - 1, h - 1, 14, 14)
             g2.dispose()
         }

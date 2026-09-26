@@ -37,11 +37,12 @@ import javax.swing.event.PopupMenuListener
 private const val SIDEBAR_WIDTH = 230
 
 class AppWindow(image: Image) : JFrame(), ActionListener {
-    private val listView = MainListView()
+    private var listView = MainListView()
     private val updatePanel = UpdatePanel()
     private var filterPanelRef: FilterListPanel? = null
     private lateinit var stateTabs: SegmentedTabs
-    private val statusBar = StatusBar()
+    private var statusBar = StatusBar()
+    private var summaryTimer: Timer? = null
 
 
     init {
@@ -76,9 +77,10 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
     }
 
     private fun initWindow() {
+        // Orange section title, like Blazma Boost's group headers.
         val pageTitle = JLabel().apply {
             font = font.deriveFont(Font.BOLD, font.size2D + 7f)
-            foreground = Blazma.text
+            foreground = Blazma.accentText
         }
         val filterPanel = FilterListPanel(
             categoryChanged = {
@@ -92,7 +94,12 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
             { listView.searchTextChanged(it) },
             this,
             { key, asc -> listView.sort(key, asc) },
-            { filterPanel.reloadCategories() }
+            {
+                filterPanel.reloadCategories()
+                // The theme chosen in Settings applies at once, like the toolbar's moon button.
+                if ((AppContext.config.theme == "light") == FlatLaf.isLafDark()) applyTheme()
+            },
+            { toggleTheme() }
         )
         toolbar.setMultiSelectView(false)
         listView.selectModeCallback = { toolbar.setMultiSelectView(it) }
@@ -227,7 +234,37 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
             statusBar.update(all)
         }
         refresh()
-        Timer(1000) { refresh() }.start()
+        summaryTimer?.stop()
+        summaryTimer = Timer(1000) { refresh() }.apply { start() }
+    }
+
+    /** The toolbar's moon/sun button: flips between the dark and the light theme. */
+    private fun toggleTheme() {
+        AppContext.config.theme = if (FlatLaf.isLafDark()) "light" else "dark"
+        AppContext.config.save()
+        applyTheme()
+    }
+
+    /**
+     * Switches the look to the configured theme without a restart: FlatLaf repaints every open
+     * window, and this window's content is built again so the colors set in code (sidebar,
+     * cards, status bar) follow. The old look fades out over the new one.
+     */
+    private fun applyTheme() {
+        val config = AppContext.config
+        val fade = xdm.app.ui.components.SnapshotFade.cover(layeredPane)
+        xdm.app.AppMain.setupTheme(config.theme, config.lang)
+        FlatLaf.updateUI()
+        contentPane.removeAll()
+        listView = MainListView()
+        statusBar = StatusBar()
+        if (detectOS() == OS.Windows) {
+            getRootPane().putClientProperty("JRootPane.titleBarBackground", UIManager.getColor("Table.background"))
+        }
+        initWindow()
+        contentPane.revalidate()
+        contentPane.repaint()
+        fade.play()
     }
 
     fun updateDownloadInView(index: Int) {

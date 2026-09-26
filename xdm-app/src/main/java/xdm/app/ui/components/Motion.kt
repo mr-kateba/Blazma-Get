@@ -80,7 +80,19 @@ open class HoverPillList<T>(model: ListModel<T>, private val pillColor: () -> Co
         repaint()
     }
 
+    /** Space between a row's edge and its pill, top and bottom. */
+    protected open val pillInset = 2
+
+    /** Paints a row's resting face under the pill (nothing by default). */
+    protected open fun paintRowBase(g: Graphics2D, index: Int, bounds: java.awt.Rectangle) {}
+
     override fun paintComponent(g: Graphics) {
+        run {
+            val g2 = g.create() as Graphics2D
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            for (i in 0 until model.size) getCellBounds(i, i)?.let { paintRowBase(g2, i, it) }
+            g2.dispose()
+        }
         if (alpha > 0.01f) {
             val g2 = g.create() as Graphics2D
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -88,7 +100,7 @@ open class HoverPillList<T>(model: ListModel<T>, private val pillColor: () -> Co
             g2.color = Color(c.red, c.green, c.blue, (c.alpha * alpha).toInt().coerceIn(0, 255))
             val x = insets.left
             val w = width - insets.left - insets.right
-            g2.fillRoundRect(x, pillY.toInt() + 2, w, pillHeight.toInt() - 4, 12, 12)
+            g2.fillRoundRect(x, pillY.toInt() + pillInset, w, pillHeight.toInt() - pillInset * 2, 12, 12)
             g2.dispose()
         }
         super.paintComponent(g)
@@ -134,5 +146,50 @@ class FadeInPanel(layout: LayoutManager) : JPanel(layout) {
     private companion object {
         const val DURATION_MS = 260f
         const val RISE_PX = 16f
+    }
+}
+
+/**
+ * A picture of a window's content laid over it, fading out: the window is rebuilt underneath
+ * (a theme change) and the old look dissolves into the new one instead of flashing.
+ */
+class SnapshotFade private constructor(private val image: java.awt.image.BufferedImage) : javax.swing.JComponent() {
+    private var alpha = 1f
+
+    override fun paintComponent(g: Graphics) {
+        val g2 = g.create() as Graphics2D
+        g2.composite = AlphaComposite.SrcOver.derive(alpha.coerceIn(0f, 1f))
+        g2.drawImage(image, 0, 0, null)
+        g2.dispose()
+    }
+
+    /** Starts the fade; the snapshot removes itself when it is gone. */
+    fun play() {
+        val started = System.nanoTime()
+        Timer(FRAME_MS) { e ->
+            val t = ((System.nanoTime() - started) / 1_000_000f / DURATION_MS).coerceAtMost(1f)
+            alpha = 1f - t * t * (3 - 2 * t) // smoothstep
+            repaint()
+            if (t >= 1f) {
+                (e.source as Timer).stop()
+                parent?.let { p -> p.remove(this); p.repaint() }
+            }
+        }.start()
+    }
+
+    companion object {
+        private const val DURATION_MS = 320f
+
+        /** Covers [pane] with a snapshot of how it looks now. */
+        fun cover(pane: javax.swing.JLayeredPane): SnapshotFade {
+            val image = java.awt.image.BufferedImage(
+                pane.width.coerceAtLeast(1), pane.height.coerceAtLeast(1), java.awt.image.BufferedImage.TYPE_INT_ARGB
+            )
+            image.createGraphics().also { pane.paint(it); it.dispose() }
+            return SnapshotFade(image).also {
+                it.setBounds(0, 0, pane.width, pane.height)
+                pane.add(it, javax.swing.JLayeredPane.DRAG_LAYER as Any)
+            }
+        }
     }
 }

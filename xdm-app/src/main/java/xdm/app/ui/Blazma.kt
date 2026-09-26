@@ -21,6 +21,15 @@ object Blazma {
     /** A panel under the mouse. */
     val panelHover: Color get() = if (dark) Color(0x24242C) else Color(0xFFF1E4)
 
+    /** A button under the mouse (Blazma Boost's ButtonBackgroundMouseoverColor). */
+    val buttonHover: Color get() = if (dark) Color(0x2E2E38) else Color(0xFFE0C2)
+
+    /**
+     * The light outline of Blazma Boost's buttons and search box: the text color drawn thin
+     * around a dark fill, so every button reads as a key.
+     */
+    val outline: Color get() = if (dark) Color(0xC8C8CE) else Color(0x5A5D62)
+
     /** Hairlines around cards and outlined buttons. */
     val border: Color get() = if (dark) Color(0x2A2A33) else Color(0xE3E3E8)
 
@@ -39,7 +48,7 @@ object Blazma {
     val accentText: Color get() = if (dark) Color(0xFF8A1F) else Color(0xE65100)
 
     /** Text and glyphs drawn on an orange fill. */
-    val onAccent: Color get() = if (dark) Color(0x121216) else Color.WHITE
+    val onAccent: Color get() = Color(0xF7F7F7)
 
     /** Orange tint behind category glyphs and selected cards. */
     fun accentTint(alpha: Int = 38): Color = accent.let { Color(it.red, it.green, it.blue, alpha) }
@@ -50,4 +59,29 @@ object Blazma {
 
     /** Corner radius of cards and buttons (10 px, as on the site). */
     const val RADIUS = 10
+
+    /** Corner arc of Blazma Boost's buttons (CornerRadius 6). */
+    const val BUTTON_ARC = 12
+
+    /**
+     * Paints a Blazma Boost button face: dark fill with a light outline, the hover fill under
+     * the mouse, or solid orange with a light rim when selected.
+     */
+    fun paintButton(g: java.awt.Graphics, x: Int, y: Int, w: Int, h: Int, selected: Boolean, hovered: Boolean = false) {
+        val g2 = g.create() as java.awt.Graphics2D
+        g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
+        g2.color = when {
+            selected -> accent
+            hovered -> buttonHover
+            else -> panel
+        }
+        g2.fillRoundRect(x, y, w, h, BUTTON_ARC, BUTTON_ARC)
+        g2.color = if (selected) accentRim else outline
+        g2.stroke = java.awt.BasicStroke(1.2f)
+        g2.drawRoundRect(x, y, w - 1, h - 1, BUTTON_ARC, BUTTON_ARC)
+        g2.dispose()
+    }
+
+    /** Rim around a selected (orange) button. */
+    private val accentRim: Color get() = if (dark) Color(0xFFB066) else Color(0xB33F00)
 }

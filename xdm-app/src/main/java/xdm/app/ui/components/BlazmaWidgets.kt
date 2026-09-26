@@ -53,10 +53,79 @@ class PrimaryButton(text: String, icon: Icon? = null) : JButton(text, icon) {
             hovered -> base.brighter()
             else -> base
         }
-        g2.fillRoundRect(0, 0, width, height, Blazma.RADIUS, Blazma.RADIUS)
+        g2.fillRoundRect(0, 0, width, height, Blazma.BUTTON_ARC, Blazma.BUTTON_ARC)
         g2.dispose()
         super.paintComponent(g)
     }
+
+    override fun getMaximumSize(): Dimension = preferredSize
+}
+
+/**
+ * A Blazma Boost key: dark fill, light outline, lighter under the mouse. Used for the toolbar's
+ * secondary actions next to the orange [PrimaryButton].
+ */
+open class KeyButton(text: String? = null, icon: Icon? = null) : JButton(text, icon) {
+    protected var hovered = false
+
+    init {
+        isContentAreaFilled = false
+        isBorderPainted = false
+        isFocusPainted = false
+        isOpaque = false
+        foreground = Blazma.text
+        iconTextGap = 8
+        border = if (text.isNullOrEmpty()) EmptyBorder(7, 8, 7, 8) else EmptyBorder(7, 12, 7, 12)
+        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+        addMouseListener(object : MouseAdapter() {
+            override fun mouseEntered(e: MouseEvent) { hovered = true; repaint() }
+            override fun mouseExited(e: MouseEvent) { hovered = false; repaint() }
+        })
+    }
+
+    override fun paintComponent(g: Graphics) {
+        Blazma.paintButton(g, 0, 0, width, height, selected = false, hovered = hovered || model.isPressed)
+        super.paintComponent(g)
+    }
+
+    override fun getMaximumSize(): Dimension = preferredSize
+}
+
+/**
+ * A [KeyButton] that stays on: outlined in orange with orange text while selected, like the
+ * quick speed limit.
+ */
+class KeyToggle : javax.swing.JToggleButton() {
+    private var hovered = false
+
+    init {
+        isContentAreaFilled = false
+        isBorderPainted = false
+        isFocusPainted = false
+        isOpaque = false
+        iconTextGap = 8
+        border = EmptyBorder(7, 12, 7, 12)
+        cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+        addMouseListener(object : MouseAdapter() {
+            override fun mouseEntered(e: MouseEvent) { hovered = true; repaint() }
+            override fun mouseExited(e: MouseEvent) { hovered = false; repaint() }
+        })
+    }
+
+    override fun paintComponent(g: Graphics) {
+        foreground = if (isSelected) Blazma.accentText else Blazma.text
+        Blazma.paintButton(g, 0, 0, width, height, selected = false, hovered = hovered)
+        if (isSelected) {
+            val g2 = g.smooth()
+            g2.color = Blazma.accent
+            g2.stroke = java.awt.BasicStroke(1.4f)
+            g2.drawRoundRect(0, 0, width - 1, height - 1, Blazma.BUTTON_ARC, Blazma.BUTTON_ARC)
+            g2.dispose()
+        }
+        super.paintComponent(g)
+    }
+
+    override fun getMaximumSize(): Dimension = preferredSize
 }
 
 /**
@@ -158,7 +227,8 @@ class SegmentedTabs(
         val arc = Blazma.RADIUS + 2
         g2.color = Blazma.panel
         g2.fillRoundRect(0, 0, width - 1, height - 1, arc, arc)
-        g2.color = Blazma.border
+        g2.color = Blazma.outline
+        g2.stroke = java.awt.BasicStroke(1.2f)
         g2.drawRoundRect(0, 0, width - 1, height - 1, arc, arc)
 
         val xs = segmentXs()

@@ -516,6 +516,7 @@ MSG_AUTO_RESUME_SUB=If the internet drops, the download continues by itself as s
 TOOL_SPEED_OFF=Full speed
 TOOL_SPEED_ON=Limited: %s
 TOOL_SPEED_TIP=Limit the download speed so other devices at home stay fast. Set the limit in Settings > Downloads.
+TOOL_THEME=Dark or light theme
 TRAY_OPEN=Open Blazma Get
 TRAY_NEW=New download
 MSG_PORT_BUSY=Blazma Get cannot start because port %d is used by another program (for example XDM).\nClose that program and try again.

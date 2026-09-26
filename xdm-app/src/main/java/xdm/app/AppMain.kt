@@ -113,7 +113,8 @@ object AppMain {
         // as Blazma Boost, blazma.nt and blazma.online, with rounded controls.
         val shared = mapOf(
             "Component.arc" to "10",
-            "Button.arc" to "10",
+            "Button.arc" to "12",
+            "Button.borderWidth" to "1",
             "TextComponent.arc" to "10",
             "ProgressBar.arc" to "999",
             "ScrollBar.thumbArc" to "999",
@@ -135,7 +136,11 @@ object AppMain {
                 "@buttonBackground" to "#1C1C22",
                 "@disabledForeground" to "#A0A0AB",
                 "Component.borderColor" to "#2A2A33",
-                "Button.borderColor" to "#3A3A45",
+                // Blazma Boost's buttons: a light outline around a dark key.
+                "Button.borderColor" to "#C8C8CE",
+                "Button.hoverBorderColor" to "#F2F2F5",
+                "Button.hoverBackground" to "#2E2E38",
+                "Button.pressedBackground" to "#3A3A45",
                 "Separator.foreground" to "#2A2A33",
                 "Table.background" to "#121216",
                 "List.background" to "#121216",
@@ -144,6 +149,8 @@ object AppMain {
                 "@accentColor" to "#E65100",
                 "@background" to "#F7F7F7",
                 "@foreground" to "#232629",
+                "Button.borderColor" to "#5A5D62",
+                "Button.hoverBackground" to "#FFE0C2",
                 "Table.background" to "#F7F7F7",
                 "List.background" to "#F7F7F7",
             )

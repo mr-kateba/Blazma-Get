@@ -33,14 +33,17 @@ class AppToolBar(
     buttonCallback: ActionListener,
     private val sortCallback: (SortKey, Boolean) -> Unit,
     /** Invoked after the settings window saves, so the sidebar can reload its categories. */
-    private val settingsSavedCallback: () -> Unit = {}
+    private val settingsSavedCallback: () -> Unit = {},
+    /** Flips between the dark and light theme (the moon button, as in Blazma Boost). */
+    private val themeCallback: () -> Unit = {}
 ) {
     private val btnNew: JButton
     private val btnSort: JButton
     private val btnSettings: JButton
     private val btnClear: JButton
     private val btnMenu: JButton
-    private val btnSpeed = JToggleButton()
+    private val btnSpeed = KeyToggle()
+    private val btnTheme: JButton
     private val btnDelete: JButton
     private val toolbar = JToolBar()
     private val btnNewGap: Component
@@ -74,26 +77,24 @@ class AppToolBar(
         }
         this.btnNewGap = Box.createRigidArea(Dimension(5, 0))
 
-        this.btnClear = createToolButton(RemixIcon.DELETE_BIN_LINE, buttonCallback, "TOOL_CLEAR", Color.gray)
+        this.btnClear = createToolButton(RemixIcon.DELETE_BIN_LINE, buttonCallback, "TOOL_CLEAR", Blazma.text)
         this.btnClearGap = Box.createRigidArea(Dimension(5, 0))
 
-        this.btnDelete = createToolButton(RemixIcon.DELETE_BIN_LINE, buttonCallback, "TOOL_DELETE", Color.gray)
+        this.btnDelete = createToolButton(RemixIcon.DELETE_BIN_LINE, buttonCallback, "TOOL_DELETE", Blazma.text)
         this.btnDeleteGap = Box.createRigidArea(Dimension(5, 0))
 
-        this.btnSort = createToolButton(RemixIcon.SORT_DESC, buttonCallback, "TOOL_SORT", Color.gray) // "Stop all");
+        this.btnSort = createToolButton(RemixIcon.SORT_DESC, buttonCallback, "TOOL_SORT", Blazma.text) // "Stop all");
         this.btnSort.addActionListener {
             showMenu(btnSort, sortMenu)
         }
         this.btnSortGap = Box.createRigidArea(Dimension(5, 0))
 
-        this.btnSettings = createToolButton(RemixIcon.SETTINGS_4_LINE, buttonCallback, "TOOL_SETTINGS", Color.gray) // "Settings");
+        this.btnSettings = createToolButton(RemixIcon.SETTINGS_4_LINE, buttonCallback, "TOOL_SETTINGS", Blazma.text) // "Settings");
         this.btnSettingsGap = Box.createRigidArea(Dimension(5, 0))
         this.btnSettings.addActionListener { showSettings() }
 
         btnSpeed.apply {
             name = "TOOL_SPEED_LIMIT"
-            iconTextGap = 10
-            margin = Insets(5, 5, 5, 5)
             toolTipText = text("TOOL_SPEED_TIP")
             addActionListener {
                 AppContext.config.speedLimiterEnabled = isSelected
@@ -103,7 +104,13 @@ class AppToolBar(
         }
         refreshSpeedButton()
 
-        this.btnMenu = createToolButton(RemixIcon.MENU_LINE, Color.gray)
+        this.btnMenu = createToolButton(RemixIcon.MENU_LINE, Blazma.text)
+        this.btnTheme = createToolButton(
+            if (com.formdev.flatlaf.FlatLaf.isLafDark()) RemixIcon.MOON_FILL else RemixIcon.SUN_FILL, Blazma.text
+        ).apply {
+            toolTipText = text("TOOL_THEME")
+            addActionListener { themeCallback() }
+        }
         btnMenu.addActionListener {
             showMenu(btnMenu, contextMenu)
         }
@@ -128,14 +135,19 @@ class AppToolBar(
             }
         }
 
+        // Outlined like Blazma Boost's search bar, with the orange magnifier.
         val txtSearch = JTextField(12).apply {
             addActionListener {
                 searchCallback(this.text)
             }
-            putClientProperty(FlatClientProperties.STYLE, "arc: 10")
+            putClientProperty(
+                FlatClientProperties.STYLE,
+                "arc: ${Blazma.BUTTON_ARC}; borderColor: ${hex(Blazma.outline)}; focusedBorderColor: ${hex(Blazma.accent)}; " +
+                    "background: ${hex(Blazma.panel)}"
+            )
             putClientProperty("JTextField.placeholderText", text("TOOL_SEARCH"))
             putClientProperty(
-                "JTextField.trailingIcon", createIcon(RemixIcon.SEARCH_LINE, 16, Color.GRAY)
+                "JTextField.leadingIcon", createIcon(RemixIcon.SEARCH_LINE, 16, Blazma.accentText)
             )
         }
         val d = txtSearch.preferredSize
@@ -145,7 +157,9 @@ class AppToolBar(
 
         toolbar.apply {
             add(txtSearch)
-            add(Box.createRigidArea(Dimension(5, 0)))
+            add(Box.createRigidArea(Dimension(6, 0)))
+            add(btnTheme)
+            add(Box.createRigidArea(Dimension(6, 0)))
             add(btnMenu)
             add(Box.createRigidArea(Dimension(5, 0)))
         }
@@ -251,10 +265,7 @@ class AppToolBar(
         val on = config.speedLimiterEnabled && config.speedLimit > 0
         btnSpeed.isSelected = on
         btnSpeed.text = if (on) text("TOOL_SPEED_ON").format(UiLocale.ltr(formatKbps(config.speedLimit))) else text("TOOL_SPEED_OFF")
-        btnSpeed.icon = createIcon(
-            RemixIcon.SPEED_LINE, 16,
-            if (on) UIManager.getColor("Component.accentColor") ?: Color.ORANGE else Color.gray
-        )
+        btnSpeed.icon = createIcon(RemixIcon.SPEED_LINE, 16, if (on) Blazma.accentText else Blazma.text)
     }
 
     private fun formatKbps(kb: Int): String =
@@ -263,6 +274,8 @@ class AppToolBar(
     private fun browse(url: String) {
         runCatching { java.awt.Desktop.getDesktop().browse(java.net.URI(url)) }
     }
+
+    private fun hex(c: Color) = String.format("#%06X", c.rgb and 0xFFFFFF)
 
     val component: Component
         get() = toolbar
@@ -284,19 +297,13 @@ class AppToolBar(
         key: String,
         iconColor: Color = Color.gray
     ): JButton {
-        return JButton(text(key)).apply {
+        return KeyButton(text(key), createIcon(iconName, 16, iconColor)).apply {
             name = key
-            iconTextGap = 10
-            icon = createIcon(iconName, 16, iconColor)
-            margin = Insets(5, 5, 5, 5)
             addActionListener(callback)
         }
     }
 
     private fun createToolButton(iconName: RemixIcon, iconColor: Color = Color.gray): JButton {
-        return JButton().apply {
-            icon = createIcon(iconName, 16, iconColor)
-            margin = Insets(5, 5, 5, 5)
-        }
+        return KeyButton(null, createIcon(iconName, 16, iconColor))
     }
 }

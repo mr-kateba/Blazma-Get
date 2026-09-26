@@ -80,8 +80,8 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
     private val navList = JList(pages.toTypedArray()).apply {
         selectionMode = ListSelectionModel.SINGLE_SELECTION
         isOpaque = false
-        fixedCellHeight = 38
-        border = EmptyBorder(10, 8, 10, 8)
+        fixedCellHeight = 44
+        border = EmptyBorder(12, 12, 10, 12)
         cellRenderer = NavRenderer()
         addListSelectionListener {
             if (selectedIndex >= 0 && !it.valueIsAdjusting) {
@@ -191,7 +191,7 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
         }
     }
 
-    /** A nav entry: glyph, label, and a rounded accent pill behind the selected one. */
+    /** A nav entry: glyph and label on a key, the selected one solid orange. */
     private class NavRenderer : DefaultListCellRenderer() {
         private var selected = false
 
@@ -203,24 +203,20 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
             isOpaque = false
             border = EmptyBorder(0, 12, 0, 12)
             iconTextGap = 11
-            font = font.deriveFont(if (isSelected) Font.BOLD else Font.PLAIN, 13.0f)
+            font = font.deriveFont(Font.BOLD, 13.5f)
+            horizontalAlignment = CENTER
+            val tint = if (isSelected) xdm.app.ui.Blazma.onAccent else xdm.app.ui.Blazma.text
             if (value is Page) {
-                val tint = if (isSelected) xdm.app.ui.Blazma.onAccent else settingsMutedColor()
-                icon = createIcon(value.icon, 18, tint)
+                icon = createIcon(value.icon, 17, tint)
                 text = xdm.app.I8N.text(value.key)
             }
-            foreground = if (isSelected) xdm.app.ui.Blazma.onAccent else settingsMutedColor()
+            foreground = tint
             return this
         }
 
+        /** A Blazma Boost key, like the main window's sidebar. */
         override fun paintComponent(g: Graphics) {
-            if (selected) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.color = xdm.app.ui.Blazma.accent
-                g2.fillRoundRect(0, 2, width, height - 4, 12, 12)
-                g2.dispose()
-            }
+            xdm.app.ui.Blazma.paintButton(g, 0, 3, width, height - 6, selected)
             super.paintComponent(g)
         }
     }
