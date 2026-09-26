@@ -1,6 +1,7 @@
 package xdm.app.ui.components
 
 import xdm.app.UiLocale
+import xdm.app.ui.Blazma
 import com.formdev.flatlaf.FlatClientProperties
 import xdm.app.AppContext
 import xdm.app.DbRecord
@@ -64,7 +65,7 @@ class MainListViewRow(
 
     private val iconBadge: JPanel
     /** Icon for a file that matches no category, and for the neutral pre-render state. */
-    private val defaultIcon = createIcon(CategoryStyle.ALL_ICON, 16, Color.WHITE)
+    private val defaultIcon = createIcon(CategoryStyle.ALL_ICON, 18, Blazma.accentText)
 
     /**
      * Category icons, cached per category. The key carries the glyph name so editing a
@@ -88,22 +89,17 @@ class MainListViewRow(
             }
         }
 
-        panel = JPanel(BorderLayout(8, 5)).apply {
-            if (AppContext.config.theme == "light") {
-                background = UIManager.getColor("Table.background")
-            }
-        }
+        panel = CardPanel(BorderLayout(12, 5), hoverCard = model != null)
         val p4 = JPanel(FlowLayout())
         p4.isOpaque = false
-        val p3 = JPanel(BorderLayout())
-        p3.background = Color(30, 144, 255)
+        val p3 = Badge()
         iconBadge = p3
 
-        icoUnchecked = createIcon(RemixIcon.CHECKBOX_BLANK_LINE, 16, Color.WHITE)
-        icoChecked = createIcon(RemixIcon.CHECKBOX_LINE, 16, Color.WHITE)
+        icoUnchecked = createIcon(RemixIcon.CHECKBOX_BLANK_LINE, 18, Blazma.accentText)
+        icoChecked = createIcon(RemixIcon.CHECKBOX_LINE, 18, Blazma.accentText)
 //        icoFile = createIcon(RemixIcon.FILE_ZIP_FILL, 16, Color.WHITE)
         icon = JLabel(defaultIcon)
-        icon.border = EmptyBorder(7, 7, 7, 7)
+        icon.border = EmptyBorder(9, 9, 9, 9)
         //    icon.addMouseMotionListener(
         //        new MouseAdapter() {
         //          @Override
@@ -160,8 +156,6 @@ class MainListViewRow(
                     }
                 }
             })
-        val dim = icon.preferredSize
-        p3.putClientProperty(FlatClientProperties.STYLE, "arc: " + dim.width)
 
         // icon.setOpaque(true);
         // icon.setBackground(Color.ORANGE);
@@ -187,31 +181,29 @@ class MainListViewRow(
             }
         })
         lblTitle.verticalAlignment = SwingConstants.BOTTOM
-        val fnt = lblTitle.font.deriveFont(12.0f)
+        lblTitle.font = lblTitle.font.deriveFont(Font.BOLD, lblTitle.font.size2D + 1f)
+        lblTitle.foreground = Blazma.text
+        val fnt = lblTitle.font.deriveFont(Font.PLAIN, 12.0f)
         lblInfo = JLabel("Some long title name for testing")
         lblInfo.verticalAlignment = SwingConstants.TOP
         lblInfo.font = fnt
-        lblInfo.font = lblTitle.font.deriveFont(12.0f)
-        lblInfo.foreground = Color.GRAY
+        lblInfo.font = fnt
+        lblInfo.foreground = Blazma.muted
         content.add(lblTitle)
         content.add(lblInfo)
 
-        val p1 = JPanel(BorderLayout(0, 0)).apply {
-            if (AppContext.config.theme == "light") {
-                background = UIManager.getColor("Table.background")
-            }
-        }
-        panDetails = JPanel(BorderLayout()).apply {
-            if (AppContext.config.theme == "light") {
-                background = UIManager.getColor("Table.background")
-            }
-        }
+        val p1 = JPanel(BorderLayout(0, 0))
+        panDetails = JPanel(BorderLayout()).apply { isOpaque = false }
         panDetails.border = EmptyBorder(UiLocale.mirrored(0, 0, 0, 10))
         prg = JProgressBar()
-        prg.preferredSize = Dimension(60, 10)
+        // 7 px bar plus the 5 px gap under it (the border).
+        prg.preferredSize = Dimension(170, 12)
+        prg.background = Blazma.border
+        prg.foreground = Blazma.accent
         prg.alignmentY = Component.TOP_ALIGNMENT
         lblProgress = JLabel("Downloading 100 %")
-        lblProgress.font = fnt
+        lblProgress.font = fnt.deriveFont(Font.BOLD)
+        lblProgress.border = EmptyBorder(0, 0, 4, 0)
         // prg.setPreferredSize(new Dimension(lblProgress.getPreferredSize().width + 5, 10));
         panDetails.add(lblProgress)
         panDetails.add(prg, BorderLayout.SOUTH)
@@ -290,7 +282,8 @@ class MainListViewRow(
         panel.add(p4, BorderLayout.LINE_START)
         panel.add(content)
         panel.add(p1, BorderLayout.LINE_END)
-        panel.border = EmptyBorder(0, 5, 5, 5)
+        // Outer margin around the card, then the card's own padding.
+        panel.border = EmptyBorder(5 + 8, 16 + 10, 5 + 8, 16 + 12)
 
         this.buttonContainer = buttonContainer
     }
@@ -339,7 +332,7 @@ class MainListViewRow(
     }
 
     private fun updateLabelText(ent: DbRecord, isSelected: Boolean) {
-        iconBadge.background = Color(30, 144, 255)//CategoryStyle.color(categoryFor(ent.fileName))
+        (panel as CardPanel).checked = isSelected
         icon.icon =
             if (isSelected) icoChecked else if (table.selectedRowCount > 0) icoUnchecked else getIcon(ent.fileName)
         buttonContainer.isVisible = table.selectedRowCount == 0
@@ -359,7 +352,8 @@ class MainListViewRow(
                     + UiLocale.ltr(formatSize(ent.size.toDouble())))
             lblTitle.text = ent.fileName
             prg.isVisible = false
-            lblProgress.text = ""
+            lblProgress.text = "✓ " + text("STAT_FINISHED")
+            lblProgress.foreground = Blazma.success
         } else {
             lblInfo.text = getStatusText(ent)
             lblTitle.text = ent.fileName
@@ -409,6 +403,11 @@ class MainListViewRow(
                 prg.isVisible = true
             }
             lblProgress.text = prgText
+            lblProgress.foreground = when {
+                ent.status == RecordStatus.PAUSED && AppContext.downloader.autoResume.isWaiting(ent.id) -> Blazma.warning
+                ent.status == RecordStatus.PAUSED || ent.status == RecordStatus.READY -> Blazma.muted
+                else -> Blazma.accentText
+            }
         }
     }
 
@@ -416,6 +415,45 @@ class MainListViewRow(
         value?.let { updateLabelText(it, isSelected) }
         table?.let { panel.background = it.background }
         return panel
+    }
+
+    /**
+     * A download as a Blazma card: a raised rounded panel with a hairline border, lighter under
+     * the mouse (the table's hover editor) and outlined in orange when ticked for a bulk action.
+     */
+    private class CardPanel(layout: LayoutManager, private val hoverCard: Boolean) : JPanel(layout) {
+        var checked = false
+
+        override fun paintComponent(g: Graphics) {
+            g.color = background
+            g.fillRect(0, 0, width, height)
+            val g2 = g.create() as Graphics2D
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            val x = 16
+            val y = 5
+            val w = width - 32
+            val h = height - 10
+            g2.color = if (hoverCard) Blazma.panelHover else Blazma.panel
+            g2.fillRoundRect(x, y, w, h, 14, 14)
+            g2.color = if (checked) Blazma.accent else Blazma.border
+            g2.drawRoundRect(x, y, w - 1, h - 1, 14, 14)
+            g2.dispose()
+        }
+    }
+
+    /** Rounded square behind the file-type glyph, tinted with the Blazma orange. */
+    private class Badge : JPanel(BorderLayout()) {
+        init {
+            isOpaque = false
+        }
+
+        override fun paintComponent(g: Graphics) {
+            val g2 = g.create() as Graphics2D
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            g2.color = Blazma.accentTint(46)
+            g2.fillRoundRect(0, 0, width, height, 12, 12)
+            g2.dispose()
+        }
     }
 
     override fun getTableCellRendererComponent(
@@ -468,9 +506,8 @@ class MainListViewRow(
 
     private fun getIcon(name: String): Icon {
         val cat = categoryFor(name) ?: return defaultIcon
-        iconBadge.background = Color(30, 144, 255)
         return iconCache.getOrPut("${cat.id}:${cat.icon}") {
-            createIcon(CategoryStyle.iconName(cat), 16, Color.WHITE)
+            createIcon(CategoryStyle.iconName(cat), 18, Blazma.accentText)
         }
     }
 }

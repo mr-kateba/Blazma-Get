@@ -51,6 +51,10 @@ class AppDB(private val configDir: String) {
     @Synchronized
     fun indexById(id: Long): Int? = indexMap[id]
 
+    /** A copy of every record, for summaries (counts, total speed) off the list model. */
+    @Synchronized
+    fun snapshot(): List<DbRecord> = records.toList()
+
     @Synchronized
     fun getByIndex(index: Int): DbRecord = records[index]
 

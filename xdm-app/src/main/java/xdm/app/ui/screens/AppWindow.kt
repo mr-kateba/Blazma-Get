@@ -15,6 +15,11 @@ import xdm.app.ui.components.AppToolBar
 import xdm.app.ui.components.FilterListPanel
 import xdm.app.ui.components.MainListView
 import xdm.app.ui.components.UpdatePanel
+import xdm.app.ui.components.SegmentedTabs
+import xdm.app.ui.components.StatusBar
+import xdm.app.ui.components.FilterState
+import xdm.app.ui.Blazma
+import xdm.app.RecordStatus
 import xdm.app.update.UpdateChecker
 import xdm.app.utils.applyMacOSWindowCustomizations
 import xdm.app.utils.detectOS
@@ -29,11 +34,15 @@ import javax.swing.border.MatteBorder
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
 
-private const val SIDEBAR_WIDTH = 180
+private const val SIDEBAR_WIDTH = 230
 
 class AppWindow(image: Image) : JFrame(), ActionListener {
     private val listView = MainListView()
     private val updatePanel = UpdatePanel()
+    private var filterPanelRef: FilterListPanel? = null
+    private lateinit var stateTabs: SegmentedTabs
+    private val statusBar = StatusBar()
+
 
     init {
         title = XDM_WINDOW_TITLE
@@ -67,10 +76,18 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
     }
 
     private fun initWindow() {
+        val pageTitle = JLabel().apply {
+            font = font.deriveFont(Font.BOLD, font.size2D + 7f)
+            foreground = Blazma.text
+        }
         val filterPanel = FilterListPanel(
-            stateChanged = { listView.filterStateChanged(it) },
-            categoryChanged = { listView.filterCategoryChanged(it) }
+            categoryChanged = {
+                listView.filterCategoryChanged(it)
+                pageTitle.text = filterPanelRef?.selectedTitle ?: ""
+            }
         )
+        filterPanelRef = filterPanel
+        pageTitle.text = filterPanel.selectedTitle
         val toolbar = AppToolBar(
             { listView.searchTextChanged(it) },
             this,
@@ -80,22 +97,41 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
         toolbar.setMultiSelectView(false)
         listView.selectModeCallback = { toolbar.setMultiSelectView(it) }
 
-        val panel = JPanel(BorderLayout(10, 0)).apply {
-            add(toolbar.component, BorderLayout.NORTH)
-            add(listView.component)
-            border = EmptyBorder(7, 0, 0, 0)
-            if (AppContext.config.theme == "light") {
-                background = UIManager.getColor("Table.background")
-            }
+        val states = listOf(FilterState.All, FilterState.Incomplete, FilterState.Completed)
+        stateTabs = SegmentedTabs(
+            listOf(text("ALL_DOWNLOADS"), text("ALL_UNFINISHED"), text("ALL_FINISHED"))
+        ) { listView.filterStateChanged(states[it]) }
+
+        // Page header: the category as a title, and the state filter as segmented tabs.
+        val header = JPanel(BorderLayout()).apply {
+            isOpaque = false
+            border = EmptyBorder(UiLocale.mirrored(14, 20, 6, 16))
+            add(pageTitle, BorderLayout.LINE_START)
+            add(JPanel(java.awt.FlowLayout(java.awt.FlowLayout.TRAILING, 0, 0)).apply {
+                isOpaque = false
+                add(stateTabs)
+            }, BorderLayout.LINE_END)
         }
+
+        val top = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
+            isOpaque = false
+            add(toolbar.component)
+            add(header)
+        }
+
+        val panel = JPanel(BorderLayout(10, 0)).apply {
+            add(top, BorderLayout.NORTH)
+            add(listView.component)
+            add(statusBar, BorderLayout.SOUTH)
+            border = EmptyBorder(7, 0, 0, 0)
+            background = Blazma.background
+        }
+        startSummaryTimer()
 
         // Keep the black top border in the dark theme (as before); use FlatLaf's
         // border color in the light theme so it isn't a harsh black line.
-        val topBorderColor = if (FlatLaf.isLafDark()) {
-            Color.BLACK
-        } else {
-            UIManager.getColor("Component.borderColor") ?: Color.GRAY
-        }
+        val topBorderColor = Blazma.border
         val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT).apply {
             border = MatteBorder(1, 0, 0, 0, topBorderColor)
             if (UiLocale.isRtl) {
@@ -118,9 +154,8 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
                 leftComponent = filterPanel.component
                 rightComponent = panel
             }
-            if (AppContext.config.theme == "light") {
-                background = UIManager.getColor("Table.background")
-            }
+            background = Blazma.background
+            dividerSize = 1
         }
         add(splitPane, BorderLayout.CENTER)
         add(updatePanel, BorderLayout.SOUTH)
@@ -178,6 +213,21 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
             val selected = listView.selectedItems
             if (selected.isNotEmpty()) AppMenuHandler.deleteSelectedDownloads(selected, this)
         }
+    }
+
+    /**
+     * Once a second: counts on the state tabs and the totals in the status bar, from a snapshot
+     * of the records (cheap: a few hundred rows at most).
+     */
+    private fun startSummaryTimer() {
+        fun refresh() {
+            val all = AppContext.db.snapshot()
+            val done = all.count { it.status == RecordStatus.FINISHED }
+            stateTabs.setCounts(listOf(all.size, all.size - done, done))
+            statusBar.update(all)
+        }
+        refresh()
+        Timer(1000) { refresh() }.start()
     }
 
     fun updateDownloadInView(index: Int) {
@@ -376,7 +426,11 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
     }
 
     private fun setWindowSizeAndPosition() {
-        setSize(800, 500)
+        // Room for the sidebar, the toolbar with its search box and the page header, without
+        // outgrowing a 1366x768 laptop screen.
+        val screen = Toolkit.getDefaultToolkit().screenSize
+        setSize(minOf(1040, screen.width * 9 / 10), minOf(640, screen.height * 85 / 100))
+        minimumSize = Dimension(860, 520)
         setLocationRelativeTo(null)
 //        if (Config.getInstance().width < 0 || Config.getInstance().height < 0) setSize(800, 500)
 //        if (Config.getInstance().x < 0 || Config.getInstance().y < 0) setLocationRelativeTo(null)

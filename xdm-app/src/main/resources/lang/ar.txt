@@ -529,3 +529,7 @@ MSG_MONITOR_CLIPBOARD=راقب الروابط المنسوخة
 MSG_MONITOR_CLIPBOARD_SUB=لما تنسخ رابط ملف (zip أو exe أو mp4...) من أي مكان، البرنامج يعرض عليك تحميله.
 PROP_CHECKSUM_CALC=احسب
 PROP_CHECKSUM_WORKING=جارٍ الحساب...
+SB_IDLE=ما فيه تحميل شغّال
+SB_ACTIVE=%d قيد التحميل
+SB_QUEUED=%d بالانتظار
+SB_DONE=%d مكتمل

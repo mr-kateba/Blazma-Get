@@ -12,6 +12,9 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
   bundled IBM Plex Sans Arabic font, `ltr()` for Latin runs (sizes, speeds) inside Arabic text.
   New layouts must use relative constraints (LINE_START/END, LEADING/TRAILING, PAGE/LINE_AXIS).
 - `AutoResume.kt`: resumes downloads that failed with `NetworkError` once the server is reachable.
+- Blazma design system: colors in `ui/Blazma.kt` (use these tokens, not hard-coded colors), FlatLaf
+  defaults in `AppMain.setupTheme`, widgets in `ui/components/BlazmaWidgets.kt` (`PrimaryButton`,
+  `SegmentedTabs`, `StatusBar`) and animations in `ui/components/Motion.kt`.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
 

@@ -1,24 +1,25 @@
 package xdm.app.ui.components
 
 
+import xdm.app.APP_NAME
 import xdm.app.UiLocale
-import com.formdev.flatlaf.FlatLaf
 import xdm.app.AppContext
 import xdm.app.DownloadCategory
 import xdm.app.I8N.text
-import xdm.app.ui.screens.settings.settingsAccentColor
+import xdm.app.ui.Blazma
+import xdm.app.utils.logoIcon
 import xdm.app.utils.RemixIcon
 import xdm.app.utils.createIcon
 import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
+import java.awt.Font
 import java.awt.Rectangle
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.border.MatteBorder
 
 class FilterListPanel(
-    val stateChanged: (FilterState) -> Unit,
     val categoryChanged: (DownloadCategory?) -> Unit
 ) :
     JPanel() {
@@ -27,70 +28,29 @@ class FilterListPanel(
     private val catFilterList: JList<FilterItem>
 
     init {
-        val stateFilterModel = DefaultListModel<FilterItem>()
-        val stateFilterList = stretchingList(stateFilterModel)
-        stateFilterModel.addElement(
-            FilterItem.State(
-                FilterState.All, text("CAT_ALL"),
-                makeIcon(RemixIcon.ARROW_DOWN_CIRCLE_LINE, Color.gray),
-                makeIcon(RemixIcon.ARROW_DOWN_CIRCLE_LINE, selectedIconColor())
-            )
-        )
-        stateFilterModel.addElement(
-            FilterItem.State(
-                FilterState.Incomplete,
-                text("CAT_INCOMPLETE"),
-                makeIcon(RemixIcon.PROGRESS_2_LINE, Color.gray),
-                makeIcon(RemixIcon.PROGRESS_2_LINE, selectedIconColor())
-            )
-        )
-        stateFilterModel.addElement(
-            FilterItem.State(
-                FilterState.Completed,
-                text("CAT_FINISHED"),
-                makeIcon(RemixIcon.CHECKBOX_CIRCLE_LINE, Color.gray),
-                makeIcon(RemixIcon.CHECKBOX_CIRCLE_LINE, selectedIconColor())
-            )
-        )
-        stateFilterList.isOpaque = false
-        stateFilterList.cellRenderer = FilterListRenderer()
-        stateFilterList.alignmentX = 0f
-        // Side padding so the selection pill floats clear of the panel edges.
-        stateFilterList.border = EmptyBorder(0, 13, 0, 13)
-
         fillCategories()
 
         catFilterList = stretchingList(catFilterModel).apply {
             selectionMode = ListSelectionModel.SINGLE_SELECTION
-            border = EmptyBorder(10, 13, 0, 13)
+            border = EmptyBorder(4, 14, 0, 14)
             isOpaque = false
+            fixedCellHeight = FilterListRenderer.ROW_HEIGHT
             cellRenderer = FilterListRenderer()
             alignmentX = 0f
         }
 
-        val sidebarBackground = if (AppContext.config.theme == "light") {
-            UIManager.getColor("Panel.background")
-        } else {
-            UIManager.getColor("Table.background")
-        }
+        val sidebarBackground = Blazma.background
 
         val box = FilterBox().apply {
-            add(stateFilterList)
+            add(brandHeader())
             add(catFilterList)
-            border = EmptyBorder(10, 0, 10, 0)
+            border = EmptyBorder(0, 0, 10, 0)
             isOpaque = true
             background = sidebarBackground
         }
 
-        // Keep the black divider in the dark theme (as before); use FlatLaf's
-        // border color in the light theme so it isn't a harsh black line.
-        val dividerColor = if (FlatLaf.isLafDark()) {
-            Color.BLACK
-        } else {
-            UIManager.getColor("Component.borderColor") ?: Color.GRAY
-        }
         jsp = JScrollPane(box).apply {
-            border = MatteBorder(UiLocale.mirrored(0, 0, 0, 1), dividerColor)
+            border = MatteBorder(UiLocale.mirrored(0, 0, 0, 1), Blazma.border)
             // The rows never fill the sidebar's height, so the viewport has to carry the
             // same colour as the panel -- otherwise the strip below the last row shows the
             // scroll pane's own background instead.
@@ -100,24 +60,35 @@ class FilterListPanel(
             viewport.background = sidebarBackground
         }
 
-        stateFilterList.selectedIndex = 0
         catFilterList.selectedIndex = 0
-
-        stateFilterList.addListSelectionListener {
-            val index = stateFilterList.selectedIndex
-            if (index != -1) {
-                val state = stateFilterModel[index] as FilterItem.State
-                stateChanged(state.state)
-            }
-        }
 
         catFilterList.addListSelectionListener {
             val index = catFilterList.selectedIndex
-            if (index != -1) {
+            if (index != -1 && !it.valueIsAdjusting) {
                 val category = catFilterModel[index] as FilterItem.Category
                 categoryChanged(category.category)
             }
         }
+    }
+
+    /** Name of the selected category, shown as the page title. */
+    val selectedTitle: String
+        get() = (catFilterList.selectedValue as? FilterItem)?.text ?: ""
+
+    /** Logo and app name at the top of the sidebar, as in Blazma Boost. */
+    private fun brandHeader(): JComponent = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
+        isOpaque = false
+        border = EmptyBorder(18, 0, 16, 0)
+        alignmentX = 0f
+        add(JLabel(logoIcon(48)).apply { alignmentX = CENTER_ALIGNMENT })
+        add(Box.createRigidArea(Dimension(0, 8)))
+        add(JLabel(APP_NAME).apply {
+            alignmentX = CENTER_ALIGNMENT
+            foreground = Blazma.accentText
+            font = font.deriveFont(Font.BOLD, font.size2D + 4f)
+        })
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
     }
 
     private fun fillCategories() {
@@ -125,7 +96,7 @@ class FilterListPanel(
         catFilterModel.addElement(
             FilterItem.Category(
                 null, text("CAT_ALL_TYPES"),
-                makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), Color.gray),
+                makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), Blazma.muted),
                 makeIcon(CategoryStyle.lineVariant(CategoryStyle.ALL_ICON), selectedIconColor())
             )
         )
@@ -135,7 +106,7 @@ class FilterListPanel(
             catFilterModel.addElement(
                 FilterItem.Category(
                     cat, cat.displayName,
-                    makeIcon(glyph, Color.gray),
+                    makeIcon(glyph, Blazma.muted),
                     makeIcon(glyph, selectedIconColor())
                 )
             )
@@ -175,7 +146,7 @@ class FilterListPanel(
      * Color of a selected row's glyph: the accent, matching the accent bar the renderer draws
      * and the settings window's selected nav entry.
      */
-    private fun selectedIconColor(): Color = settingsAccentColor()
+    private fun selectedIconColor(): Color = Blazma.onAccent
 
     private fun makeIcon(icon: RemixIcon, color: Color): Icon {
         return createIcon(icon, 20, color)

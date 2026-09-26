@@ -4,6 +4,7 @@ import xdm.app.UiLocale
 import com.formdev.flatlaf.FlatClientProperties
 import xdm.app.APP_HOME_PAGE
 import xdm.app.AppContext
+import xdm.app.ui.Blazma
 import xdm.app.I8N.text
 import xdm.app.ui.screens.AboutDialog
 import xdm.app.ui.screens.SettingsWindow
@@ -66,7 +67,11 @@ class AppToolBar(
     init {
         this.contextMenu = createContextMenu()
         this.sortMenu = createSortMenu()
-        this.btnNew = createToolButton(RemixIcon.ADD_LARGE_FILL, buttonCallback, "TOOL_DOWNLOAD", Color.gray)
+        // The main action, filled orange like Blazma Boost's selected button.
+        this.btnNew = PrimaryButton(text("TOOL_DOWNLOAD"), createIcon(RemixIcon.ADD_LARGE_FILL, 16, Blazma.onAccent)).apply {
+            name = "TOOL_DOWNLOAD"
+            addActionListener(buttonCallback)
+        }
         this.btnNewGap = Box.createRigidArea(Dimension(5, 0))
 
         this.btnClear = createToolButton(RemixIcon.DELETE_BIN_LINE, buttonCallback, "TOOL_CLEAR", Color.gray)

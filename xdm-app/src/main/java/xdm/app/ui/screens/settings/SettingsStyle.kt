@@ -47,27 +47,12 @@ internal fun settingsMutedColor(): Color =
     UIManager.getColor("Label.disabledForeground")
         ?: (UIManager.getColor("Label.foreground") ?: Color.GRAY).let { Color(it.red, it.green, it.blue, 170) }
 
-/** Base panel color the cards, tiles and hairlines are all derived from. */
-private fun settingsBase(): Color = UIManager.getColor("Panel.background") ?: Color(0x3C, 0x3F, 0x41)
-
-private fun isDark(c: Color): Boolean = (c.red * 299 + c.green * 587 + c.blue * 114) / 1000 < 128
-
-private fun shift(c: Color, amount: Int): Color {
-    fun clamp(v: Int) = v.coerceIn(0, 255)
-    return Color(clamp(c.red + amount), clamp(c.green + amount), clamp(c.blue + amount))
-}
-
 /** Fill of a raised surface (card, tile) against the panel background. */
-internal fun settingsSurface(hovered: Boolean = false): Color {
-    val base = settingsBase()
-    return if (isDark(base)) shift(base, if (hovered) 24 else 16) else shift(base, if (hovered) -14 else -8)
-}
+internal fun settingsSurface(hovered: Boolean = false): Color =
+    if (hovered) xdm.app.ui.Blazma.panelHover else xdm.app.ui.Blazma.panel
 
 /** Border/hairline color against the panel background. */
-internal fun settingsStroke(): Color {
-    val base = settingsBase()
-    return if (isDark(base)) shift(base, 34) else shift(base, -22)
-}
+internal fun settingsStroke(): Color = xdm.app.ui.Blazma.border
 
 /** The large bold heading shown at the top of a settings panel. */
 internal fun settingsTitle(text: String): JLabel = JLabel(text).apply {
@@ -79,9 +64,10 @@ internal fun settingsTitle(text: String): JLabel = JLabel(text).apply {
 /** The small muted caption that sits *outside* and above a card. */
 internal fun settingsSectionLabel(text: String): JLabel = JLabel(text.uppercase()).apply {
     alignmentX = Component.LEFT_ALIGNMENT
-    font = font.deriveFont(Font.BOLD, 11.0f)
-    foreground = settingsMutedColor()
-    border = EmptyBorder(0, 4, 7, 0)
+    // Orange section headings, like Blazma Boost's.
+    font = font.deriveFont(Font.BOLD, 12.5f)
+    foreground = xdm.app.ui.Blazma.accentText
+    border = EmptyBorder(0, 4, 8, 0)
 }
 
 /**

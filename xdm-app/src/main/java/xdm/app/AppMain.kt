@@ -109,14 +109,43 @@ object AppMain {
     @JvmStatic
     fun setupTheme(theme: String, lang: String = "en") {
         val dark = theme.lowercase() != "light"
-        // Blazma brand: the orange accent of the Blazma store, on a slightly warm dark background.
+        // Blazma design tokens (see ui/Blazma.kt): the same background, panels, text and orange
+        // as Blazma Boost, blazma.nt and blazma.online, with rounded controls.
+        val shared = mapOf(
+            "Component.arc" to "10",
+            "Button.arc" to "10",
+            "TextComponent.arc" to "10",
+            "ProgressBar.arc" to "999",
+            "ScrollBar.thumbArc" to "999",
+            "ScrollBar.thumbInsets" to "2,2,2,2",
+            "ScrollBar.width" to "10",
+            "PopupMenu.borderCornerRadius" to "10",
+            "Popup.borderCornerRadius" to "10",
+            // Plain arrow buttons like the spinners, instead of the macOS orange block.
+            "ComboBox.background" to "@componentBackground",
+            "ComboBox.buttonBackground" to "@buttonBackground",
+            "ComboBox.buttonArrowColor" to "@foreground",
+        )
         FlatLaf.setGlobalExtraDefaults(
-            if (dark) mapOf(
+            shared + if (dark) mapOf(
                 "@accentColor" to "#FF6D00",
-                "@background" to "#1C1C22",
-                "@foreground" to "#EDEDF0",
+                "@background" to "#121216",
+                "@foreground" to "#F2F2F5",
+                "@componentBackground" to "#1C1C22",
+                "@buttonBackground" to "#1C1C22",
+                "@disabledForeground" to "#A0A0AB",
+                "Component.borderColor" to "#2A2A33",
+                "Button.borderColor" to "#3A3A45",
+                "Separator.foreground" to "#2A2A33",
+                "Table.background" to "#121216",
+                "List.background" to "#121216",
+                "ScrollPane.background" to "#121216",
             ) else mapOf(
                 "@accentColor" to "#E65100",
+                "@background" to "#F7F7F7",
+                "@foreground" to "#232629",
+                "Table.background" to "#F7F7F7",
+                "List.background" to "#F7F7F7",
             )
         )
         UiLocale.registerFont(lang)?.let { FlatLaf.setPreferredFontFamily(it) }

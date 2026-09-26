@@ -537,3 +537,7 @@ MSG_MONITOR_CLIPBOARD=Watch copied links
 MSG_MONITOR_CLIPBOARD_SUB=When you copy a link to a file (zip, exe, mp4...), Blazma Get offers to download it.
 PROP_CHECKSUM_CALC=Calculate
 PROP_CHECKSUM_WORKING=Calculating...
+SB_IDLE=Nothing downloading
+SB_ACTIVE=%d downloading
+SB_QUEUED=%d waiting
+SB_DONE=%d finished

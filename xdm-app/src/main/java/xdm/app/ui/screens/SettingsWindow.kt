@@ -169,10 +169,10 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
         }
 
         override fun paintComponent(g: Graphics) {
-            g.color = settingsSurface()
+            g.color = xdm.app.ui.Blazma.background
             g.fillRect(0, 0, width, height)
             g.color = settingsStroke()
-            g.fillRect(width - 1, 0, 1, height)
+            g.fillRect(if (componentOrientation.isLeftToRight) width - 1 else 0, 0, 1, height)
             super.paintComponent(g)
         }
     }
@@ -205,20 +205,19 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
             iconTextGap = 11
             font = font.deriveFont(if (isSelected) Font.BOLD else Font.PLAIN, 13.0f)
             if (value is Page) {
-                val tint = if (isSelected) settingsAccentColor() else settingsMutedColor()
+                val tint = if (isSelected) xdm.app.ui.Blazma.onAccent else settingsMutedColor()
                 icon = createIcon(value.icon, 18, tint)
                 text = xdm.app.I8N.text(value.key)
             }
-            foreground = if (isSelected) UIManager.getColor("Label.foreground") else settingsMutedColor()
+            foreground = if (isSelected) xdm.app.ui.Blazma.onAccent else settingsMutedColor()
             return this
         }
 
         override fun paintComponent(g: Graphics) {
             if (selected) {
-                val accent = settingsAccentColor()
                 val g2 = g.create() as Graphics2D
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.color = Color(accent.red, accent.green, accent.blue, 46)
+                g2.color = xdm.app.ui.Blazma.accent
                 g2.fillRoundRect(0, 2, width, height - 4, 12, 12)
                 g2.dispose()
             }

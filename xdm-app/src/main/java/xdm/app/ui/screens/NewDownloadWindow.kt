@@ -105,7 +105,7 @@ class NewDownloadWindow : JDialog() {
         txtFileName.columns = 10
 
         lblFileInfo = JLabel().apply {
-            icon = createIcon(RemixIcon.FILE_LINE, 36, Color.GRAY)
+            icon = createIcon(RemixIcon.FILE_LINE, 36, xdm.app.ui.Blazma.accentText)
             verticalTextPosition = SwingConstants.BOTTOM
             horizontalTextPosition = SwingConstants.CENTER
             horizontalAlignment = SwingConstants.CENTER
@@ -146,7 +146,7 @@ class NewDownloadWindow : JDialog() {
         }
         contentPane.add(cmbSaveIn, gbcCmbSaveIn)
 
-        val btnBrowse = JButton(createIcon(RemixIcon.FOLDER_FILL, 16, Color.GRAY))
+        val btnBrowse = JButton(createIcon(RemixIcon.FOLDER_FILL, 16, xdm.app.ui.Blazma.muted))
         val gbcBtnBrowse = GridBagConstraints().apply {
             insets = Insets(5, 0, 5, 5)
             gridx = 4

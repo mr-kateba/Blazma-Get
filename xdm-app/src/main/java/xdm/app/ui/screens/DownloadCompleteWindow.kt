@@ -130,7 +130,7 @@ class DownloadCompleteWindow : JDialog() {
             Toolkit.getDefaultToolkit().systemClipboard
                 .setContents(StringSelection(source.text), null)
             val original = icon
-            icon = createIcon(RemixIcon.CHECKBOX_CIRCLE_FILL, 16, Color(0x2ECC71))
+            icon = createIcon(RemixIcon.CHECKBOX_CIRCLE_FILL, 16, xdm.app.ui.Blazma.success)
             Timer(1100) { icon = original }.apply { isRepeats = false }.start()
         }
     }
@@ -181,7 +181,7 @@ class DownloadCompleteWindow : JDialog() {
 
         val header = Box(BoxLayout.PAGE_AXIS).apply {
             alignmentX = Component.CENTER_ALIGNMENT
-            add(JLabel(createIcon(RemixIcon.CHECKBOX_CIRCLE_FILL, 44, Color(0x2ECC71))).apply {
+            add(JLabel(createIcon(RemixIcon.CHECKBOX_CIRCLE_FILL, 44, xdm.app.ui.Blazma.success)).apply {
                 alignmentX = Component.CENTER_ALIGNMENT
             })
             add(Box.createVerticalStrut(10))
