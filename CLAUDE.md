@@ -23,6 +23,9 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
   disk error fails the download once instead of looping.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
+  The installers ship a jlink runtime with only the modules in `packaging/build-bundle.{sh,ps1}`
+  (no `jdk.zipfs`, `java.sql`, ...): code that works with a full JDK can fail there, e.g. read jar
+  resources with `JarFile`, never `FileSystems.newFileSystem`.
 
 ## Overview
 

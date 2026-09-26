@@ -11,12 +11,12 @@ import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.Window
 import java.io.File
-import java.net.URI
-import java.nio.file.FileSystems
+import java.net.JarURLConnection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.util.jar.JarFile
 import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
@@ -111,20 +111,37 @@ class ExtensionSetupDialog(owner: Window?, private val browser: ExtensionBrowser
          */
         fun extract(folder: String): File? = runCatching {
             val target = File(AppContext.configDir, "browser-extension/$folder")
-            val uri: URI = ExtensionSetupDialog::class.java.getResource("/extension/$folder")?.toURI()
+            val url = ExtensionSetupDialog::class.java.getResource("/extension/$folder")
                 ?: error("extension $folder is not bundled")
-            if (uri.scheme == "jar") {
-                FileSystems.newFileSystem(uri, emptyMap<String, Any>()).use { fs ->
-                    copyTree(fs.getPath("/extension/$folder"), target)
-                }
+            target.deleteRecursively()
+            if (url.protocol == "jar") {
+                // Read the app jar with JarFile (java.base). Not FileSystems.newFileSystem: the
+                // installers' trimmed Java runtime has no zip file system (jdk.zipfs), so that
+                // failed with "Provider jar not found" on every Windows and Linux install.
+                val jarFile = File((url.openConnection() as JarURLConnection).jarFileURL.toURI())
+                JarFile(jarFile).use { copyEntries(it, "extension/$folder/", target) }
             } else {
-                copyTree(Paths.get(uri), target)
+                copyTree(Paths.get(url.toURI()), target)
             }
             target
         }.onFailure { Logger.error("Unable to extract browser extension $folder", it) }.getOrNull()
 
+        /** Copies the files of [jar] under [prefix] into [target], keeping their relative paths. */
+        internal fun copyEntries(jar: JarFile, prefix: String, target: File) {
+            val root = target.canonicalFile
+            var copied = 0
+            for (entry in jar.entries()) {
+                if (entry.isDirectory || !entry.name.startsWith(prefix)) continue
+                val dest = File(root, entry.name.removePrefix(prefix)).canonicalFile
+                require(dest.path.startsWith(root.path + File.separator)) { "entry outside the folder: ${entry.name}" }
+                dest.parentFile.mkdirs()
+                jar.getInputStream(entry).use { input -> dest.outputStream().use { input.copyTo(it) } }
+                copied++
+            }
+            check(copied > 0) { "no files under $prefix" }
+        }
+
         private fun copyTree(source: Path, target: File) {
-            target.deleteRecursively()
             Files.walk(source).use { paths ->
                 paths.forEach { p ->
                     val dest = target.toPath().resolve(source.relativize(p).toString())
