@@ -33,7 +33,11 @@
 
 <p align="center"><img src="screenshots/extension/2-setup-dialog-ar.png" width="560" alt="نافذة تثبيت الإضافة"></p>
 
-مكان المجلد في ويندوز: `C:\Users\اسمك\.blazma-get\browser-extension\chrome-extension`
+مكان المجلد في ويندوز (تقدر تلصقه في شريط العنوان حق مستكشف الملفات):
+
+```
+%USERPROFILE%\.blazma-get\browser-extension\chrome-extension
+```
 
 ### 3. افتح صفحة الإضافات وفعّل وضع المطوّر
 
@@ -124,7 +128,11 @@ A window with the same steps opens:
 
 <p align="center"><img src="screenshots/extension/2-setup-dialog-en.png" width="560" alt="Extension setup window"></p>
 
-On Windows the folder is `C:\Users\<you>\.blazma-get\browser-extension\chrome-extension`.
+On Windows the folder is (you can paste this into File Explorer's address bar):
+
+```
+%USERPROFILE%\.blazma-get\browser-extension\chrome-extension
+```
 
 ### 3. Open the extensions page and turn on Developer mode
 
