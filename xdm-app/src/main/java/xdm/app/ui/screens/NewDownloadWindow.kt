@@ -135,7 +135,8 @@ class NewDownloadWindow : JDialog() {
         contentPane.add(lblSaveIn, gbcLblSaveIn)
 
         modelSaveIn = DefaultComboBoxModel()
-        cmbSaveIn = JComboBox(modelSaveIn)
+        // A folder path reads left to right, even in the Arabic UI (or "/home/x" shows as "home/x/").
+        cmbSaveIn = xdm.app.UiLocale.keepLtr(JComboBox(modelSaveIn))
         val gbcCmbSaveIn = GridBagConstraints().apply {
             gridwidth = 3
             weightx = 1.0

@@ -78,12 +78,14 @@
 
 ### 🧩 ربطه بالمتصفح
 
-عشان يلتقط التحميلات والفيديوهات من المتصفح:
+عشان يلتقط التحميلات والفيديوهات من المتصفح، ثبّت الإضافة (موجودة داخل البرنامج، وتاخذ دقيقة):
 
 1. في Blazma Get افتح **الإعدادات ← المتصفح** واضغط على متصفحك (Chrome أو Edge أو Firefox)
-2. اضغط **افتح مجلد الإضافة**
-3. افتح `chrome://extensions` (أو `edge://extensions`) وفعّل **وضع المطوّر** (Developer mode)
-4. اضغط **Load unpacked** واختر المجلد، وخلّ Blazma Get شغّال، وأي تحميل من المتصفح بيروح له مباشرة
+2. اضغط **افتح مجلد الإضافة** و**انسخ عنوان الصفحة**
+3. في المتصفح الصق العنوان (`chrome://extensions`) وفعّل **وضع مطوّر البرامج**
+4. اضغط **تحميل إضافة تم فك حزمتها** (Load unpacked) واختر المجلد
+
+📖 **[الشرح الكامل بالصور](docs/BROWSER-EXTENSION.md)**، وفيه فايرفوكس وحلول المشاكل
 
 ### 🛠️ للمطوّرين
 
@@ -151,9 +153,15 @@ Get the latest files from the [**Releases page**](https://github.com/mr-kateba/B
 | `BlazmaGet-Portable-….zip` | Windows, no install: unzip and run `BlazmaGet.exe` |
 | `blazma-get_…_amd64.deb` | Debian / Ubuntu |
 | `BlazmaGet-….jar` | Any OS with Java 11+ |
-| `BlazmaGet-Chrome-Extension.zip` | Browser integration: load it unpacked from `chrome://extensions` |
+| `BlazmaGet-Chrome-Extension.zip` | Browser integration (also built into the app): see the [extension guide](docs/BROWSER-EXTENSION.md#english) |
 
 The installer is not code-signed yet, so Windows SmartScreen may warn about it: click **More info**, then **Run anyway**.
+
+### Browser extension
+
+To catch downloads and videos from the browser, install the extension. It ships inside Blazma Get and takes a minute: **Settings > Browser**, click your browser, then follow the four steps (open the extension folder, open `chrome://extensions`, turn on Developer mode, **Load unpacked**).
+
+📖 **[Step-by-step guide with screenshots](docs/BROWSER-EXTENSION.md#english)**, including Firefox and troubleshooting.
 
 ### Build from source
 
