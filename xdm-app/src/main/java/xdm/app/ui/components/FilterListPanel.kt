@@ -167,17 +167,15 @@ class FilterListPanel(
      * two stacked lists do not share out the leftover vertical space between them.
      */
     private fun stretchingList(model: DefaultListModel<FilterItem>): JList<FilterItem> =
-        object : JList<FilterItem>(model) {
+        object : HoverPillList<FilterItem>(model, FilterListRenderer::pillColor) {
             override fun getMaximumSize(): Dimension = Dimension(Int.MAX_VALUE, preferredSize.height)
-        }
+        }.apply { cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR) }
 
     /**
-     * Color of a selected row's glyph. The dark theme brightens the normal gray, as it always
-     * has; the light theme uses the accent, so the selected icon matches the settings window's
-     * selected nav entry.
+     * Color of a selected row's glyph: the accent, matching the accent bar the renderer draws
+     * and the settings window's selected nav entry.
      */
-    private fun selectedIconColor(): Color =
-        if (FlatLaf.isLafDark()) FilterListRenderer.emphasize(Color.gray) else settingsAccentColor()
+    private fun selectedIconColor(): Color = settingsAccentColor()
 
     private fun makeIcon(icon: RemixIcon, color: Color): Icon {
         return createIcon(icon, 20, color)

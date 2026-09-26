@@ -69,7 +69,7 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
     var onSaved: (() -> Unit)? = null
 
     private val card = java.awt.CardLayout()
-    private val panelHolder = JPanel(card)
+    private val panelHolder = xdm.app.ui.components.FadeInPanel(card)
 
     private val btnSave = xdm.app.ui.screens.settings.settingsButton(text("DESC_SAVE_Q")) {
         save()
@@ -83,7 +83,12 @@ class SettingsWindow(parent: Window) : JDialog(parent) {
         fixedCellHeight = 38
         border = EmptyBorder(10, 8, 10, 8)
         cellRenderer = NavRenderer()
-        addListSelectionListener { if (selectedIndex >= 0) card.show(panelHolder, pages[selectedIndex].key) }
+        addListSelectionListener {
+            if (selectedIndex >= 0 && !it.valueIsAdjusting) {
+                card.show(panelHolder, pages[selectedIndex].key)
+                panelHolder.play()
+            }
+        }
     }
 
     init {

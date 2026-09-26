@@ -32,7 +32,7 @@ class MainListView {
     private val table: JTable = JTable(model)
     private val jsp: JScrollPane
     private val cardLayout = CardLayout()
-    private val cardPanel = JPanel(cardLayout).apply {
+    private val cardPanel = FadeInPanel(cardLayout).apply {
         if (AppContext.config.theme == "light") {
             background = UIManager.getColor("Table.background")
         }
@@ -238,19 +238,24 @@ class MainListView {
         return mItem
     }
 
+    // Changing what the list shows plays a short fade, so the switch is felt even when the
+    // new list looks much like the old one.
     fun filterStateChanged(state: FilterState) {
         filter.filterState = state
         model.fireTableDataChanged()
+        cardPanel.play()
     }
 
     fun filterCategoryChanged(category: DownloadCategory?) {
         filter.filterCategory = category
         model.fireTableDataChanged()
+        cardPanel.play()
     }
 
     fun searchTextChanged(text: String) {
         filter.searchText = text
         model.fireTableDataChanged()
+        cardPanel.play()
     }
 
     fun sort(sortKey: SortKey, ascending: Boolean) {

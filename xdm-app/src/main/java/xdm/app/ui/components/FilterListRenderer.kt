@@ -28,6 +28,20 @@ class FilterListRenderer : ListCellRenderer<FilterItem> {
             if (FlatLaf.isLafDark()) blend(c, Color.WHITE, 0.95f)
             else blend(c, Color.BLACK, 0.45f)
 
+        /**
+         * The hover pill. The sidebar is `Table.background`, so in the dark theme it is a
+         * translucent button fill; in the light theme a neutral shift is too faint against the
+         * pale sidebar, so it is the accent tint the settings nav rail uses.
+         */
+        fun pillColor(): Color =
+            if (FlatLaf.isLafDark()) {
+                val c1 = UIManager.getColor("Button.background")
+                Color(c1.red, c1.green, c1.blue, 75)
+            } else {
+                val accent = settingsAccentColor()
+                Color(accent.red, accent.green, accent.blue, 46)
+            }
+
         private fun blend(c: Color, towards: Color, amount: Float): Color = Color(
             (c.red + (towards.red - c.red) * amount).toInt(),
             (c.green + (towards.green - c.green) * amount).toInt(),
@@ -62,8 +76,9 @@ class FilterListRenderer : ListCellRenderer<FilterItem> {
     }
 
     /**
-     * Draws the selected row as a rounded pill, shaped like the settings window's nav rail so
-     * the two sidebars read as the same control.
+     * Marks the selected row with an accent bar on its leading edge. The translucent pill is
+     * drawn by [HoverPillList] under the mouse only, so the sidebar never shows two rows
+     * highlighted at once (one per list) and the highlight follows the pointer smoothly.
      */
     private class PillLabel : JLabel() {
         var selected = false
@@ -72,27 +87,13 @@ class FilterListRenderer : ListCellRenderer<FilterItem> {
             if (selected) {
                 val g2 = g.create() as Graphics2D
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.color = pillColor()
-                g2.fillRoundRect(0, 2, width, height - 4, 12, 12)
+                g2.color = settingsAccentColor()
+                val barH = height - 18
+                val x = if (componentOrientation.isLeftToRight) 1 else width - 4
+                g2.fillRoundRect(x, (height - barH) / 2, 3, barH, 3, 3)
                 g2.dispose()
             }
             super.paintComponent(g)
         }
-
-        /**
-         * The sidebar is `Table.background`, so the pill has to come from somewhere else to be
-         * visible at all. In the dark theme that is a translucent button fill, which reads as a
-         * recess; in the light theme a neutral shift is too faint against an already pale
-         * sidebar, so it takes the same accent tint the settings nav rail marks its selected
-         * page with.
-         */
-        private fun pillColor(): Color =
-            if (FlatLaf.isLafDark()) {
-                val c1 = UIManager.getColor("Button.background")
-                Color(c1.red, c1.green, c1.blue, 75) //?: settingsSurface()
-            } else {
-                val accent = settingsAccentColor()
-                Color(accent.red, accent.green, accent.blue, 46)
-            }
     }
 }
