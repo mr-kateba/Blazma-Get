@@ -260,16 +260,25 @@ class App {
         }
     }
 
+    /** Right-click menu text, in Arabic when the browser runs in Arabic. */
+    menuTitle(kind) {
+        const arabic = (chrome.i18n.getUILanguage() || "").toLowerCase().startsWith("ar");
+        if (kind === "image") {
+            return arabic ? "تحميل الصورة بـ Blazma Get" : "Download image with Blazma Get";
+        }
+        return arabic ? "تحميل بـ Blazma Get" : "Download with Blazma Get";
+    }
+
     attachContextMenu() {
         browser.menus.create({
             id: 'download-any-link',
-            title: "Download with XDM",
+            title: this.menuTitle("link"),
             contexts: ["link", "video", "audio", "all"]
         });
 
         browser.menus.create({
             id: 'download-image-link',
-            title: "Download Image with XDM",
+            title: this.menuTitle("image"),
             contexts: ["image"]
         });
 
