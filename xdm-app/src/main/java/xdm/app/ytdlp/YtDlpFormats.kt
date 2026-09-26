@@ -43,7 +43,33 @@ data class VideoInfo(
     val thumbnail: String?,
     val site: String?,
     val options: List<DownloadOption>,
+    /** yt-dlp said it had no JavaScript runtime, so YouTube offered it fewer qualities. */
+    val jsRuntimeMissing: Boolean = false,
 )
+
+/** One video of a playlist, as `yt-dlp --flat-playlist` lists it (no formats yet). */
+data class PlaylistEntry(val url: String, val title: String, val durationSeconds: Long?)
+
+data class PlaylistInfo(val title: String, val entries: List<PlaylistEntry>)
+
+/**
+ * A quality for a whole playlist. Each video picks its own formats with yt-dlp selectors, falling
+ * back to the nearest lower quality: MP4 video (H.264 first) + M4A audio, which the transmuxer joins.
+ */
+data class PlaylistPreset(val audioOnly: Boolean, val height: Int?, val formatIds: List<String>, val ext: String) {
+    companion object {
+        private const val AUDIO = "ba[ext=m4a]/ba[ext=mp4]"
+
+        fun video(height: Int) = PlaylistPreset(
+            false, height,
+            listOf("bv[ext=mp4][vcodec^=avc1][height<=$height]/bv[ext=mp4][height<=$height]/bv[ext=mp4]", AUDIO),
+            "mp4",
+        )
+
+        val all: List<PlaylistPreset> = listOf(1080, 720, 480, 360).map(::video) +
+            PlaylistPreset(true, null, listOf(AUDIO), "m4a")
+    }
+}
 
 object YtDlpFormats {
     private val json = Json { ignoreUnknownKeys = true }
@@ -62,6 +88,27 @@ object YtDlpFormats {
             site = root.str("extractor_key") ?: root.str("extractor"),
             options = options,
         )
+    }
+
+    /**
+     * Parses `yt-dlp -J --flat-playlist` output. A single video (not a playlist) gives no entries.
+     * Entries without an address yt-dlp can open again are left out.
+     */
+    fun parsePlaylist(jsonText: String): PlaylistInfo {
+        val root = json.parseToJsonElement(jsonText).jsonObject
+        val entries = (root["entries"] as? JsonArray)?.mapNotNull { e ->
+            val o = e as? JsonObject ?: return@mapNotNull null
+            val id = o.str("id")
+            val url = listOfNotNull(o.str("webpage_url"), o.str("url")).firstOrNull { it.startsWith("http") }
+                ?: id?.takeIf { o.str("ie_key") == "Youtube" }?.let { "https://www.youtube.com/watch?v=$it" }
+                ?: return@mapNotNull null
+            PlaylistEntry(
+                url = url,
+                title = o.str("title")?.takeIf { it.isNotBlank() } ?: id ?: "video",
+                durationSeconds = (o["duration"] as? JsonPrimitive)?.doubleOrNull?.toLong(),
+            )
+        } ?: emptyList()
+        return PlaylistInfo(root.str("title")?.takeIf { it.isNotBlank() } ?: "playlist", entries)
     }
 
     private fun toFormat(o: JsonObject): YtFormat? {

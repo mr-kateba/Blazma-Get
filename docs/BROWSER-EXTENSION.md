@@ -97,6 +97,10 @@
 
 أول مرة تحمّل فيها من يوتيوب، البرنامج ينزّل أداة [yt-dlp](https://github.com/yt-dlp/yt-dlp) المجانية (حوالي 18 ميجا) ويتأكد من سلامتها، ويحدّثها لحاله كل يوم عشان تتابع تغييرات يوتيوب. الفيديو والصوت يندمجون في ملف MP4 واحد داخل البرنامج نفسه.
 
+**جودات يوتيوب كاملة:** لو طلع لك شريط برتقالي يقول إن بعض الجودات مخفية، اضغط **حمّل المحرك** مرة وحدة بس. البرنامج ينزّل محرك [Deno](https://deno.com) المجاني (حوالي 40 ميجا) ويتأكد من سلامته، وبعدها تطلع كل الجودات مثل 1080p.
+
+**قائمة تشغيل كاملة:** افتح قائمة التشغيل في يوتيوب (أو أي فيديو من داخلها) واضغط **حمّل من القائمة** في الإضافة. في نافذة Blazma Get اختر **القائمة كاملة**، والجودة، وشيل الصح عن أي فيديو ما تبيه، واضغط **تحميل**. الفيديوهات تنحفظ في مجلد باسم القائمة ومرقّمة بالترتيب (`01 - ...`، `02 - ...`)، وتتحمّل ورا بعض.
+
 **باقي المواقع:** الفيديوهات اللي تشتغل في الصفحة تطلع في قائمة **الملفات اللي لقيناها**، والرقم على الأيقونة يقول كم وحدة. القائمة تتحدّث لحالها وهي مفتوحة. لو ما طلع شي: شغّل الفيديو أو اضغط **تحديث الصفحة**.
 
 <p align="center"><img src="screenshots/extension/8-popup-found-ar.png" width="330" alt="الملفات اللي لقيناها"></p>
@@ -210,6 +214,10 @@ Click the Blazma Get icon next to the address bar (if it is hidden: click the pu
 **YouTube and video sites** (YouTube, X/Twitter, Instagram, TikTok, Facebook, Vimeo and more): on a video page the icon shows **▶** and its window has a **Download this video** button. Blazma Get opens a window where you pick the quality (e.g. 1080p) or **audio only**.
 
 The first time, Blazma Get downloads the free [yt-dlp](https://github.com/yt-dlp/yt-dlp) tool (about 18 MB), checks it against its published checksum, and updates it daily to keep up with YouTube. Video and audio are merged into one MP4 by Blazma Get itself, no ffmpeg needed.
+
+**All YouTube qualities:** if an orange bar says some qualities are hidden, click **Download engine** once. Blazma Get fetches the free [Deno](https://deno.com) engine (about 40 MB), verifies it, and every quality such as 1080p shows up.
+
+**Whole playlists:** open a YouTube playlist (or any video from one) and click **Download from the playlist** in the extension. In Blazma Get choose **Whole playlist**, the quality, untick any video you don't want, and click **Download**. The videos go into a folder named after the playlist, numbered in order (`01 - ...`, `02 - ...`), and download one after another.
 
 **Other sites:** videos a page plays are listed under **Found on this page**, with their number on the icon. The list updates live while the window is open; if nothing shows, play the video or click **Reload page**.
 

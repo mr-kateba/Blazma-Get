@@ -178,6 +178,24 @@ class TestYtDlpDownloader {
     }
 
     @Test
+    fun command_carriesTheAppsExtraOptions_beforeThePage() {
+        val cmd = YtDlpDownloaderTask(
+            task(listOf("bv[ext=mp4][height<=720]/bv[ext=mp4]", "ba[ext=m4a]")), host(), { "yt-dlp" }, StubMuxer(),
+            TestConfig(1), extraArgs = { listOf("--js-runtimes", "deno:/tools/deno") }
+        ).buildCommand("yt-dlp", 0, "bv[ext=mp4][height<=720]/bv[ext=mp4]")
+        assertEquals(
+            listOf("--js-runtimes", "deno:/tools/deno", "--", "https://www.youtube.com/watch?v=x"),
+            cmd.takeLast(4)
+        )
+        assertEquals("bv[ext=mp4][height<=720]/bv[ext=mp4]", cmd[cmd.indexOf("-f") + 1])
+        // A failing option source never stops the download.
+        val safe = YtDlpDownloaderTask(task(listOf("18")), host(), { "yt-dlp" }, StubMuxer(), TestConfig(1)) {
+            throw IllegalStateException("no config")
+        }.buildCommand("yt-dlp", 0, "18")
+        assertEquals("--", safe[safe.size - 2])
+    }
+
+    @Test
     fun errors_areClassified() {
         fun c(line: String) = YtDlpDownloaderTask.classifyError(listOf(line))
         assertEquals(DownloadError.NetworkError, c("ERROR: Unable to download webpage: <urlopen error timed out>"))

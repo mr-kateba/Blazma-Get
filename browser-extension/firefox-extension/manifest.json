@@ -5,7 +5,7 @@
         "default_title": "Blazma Get"
     },
     "manifest_version": 2,
-    "version": "1.5",
+    "version": "1.6",
     "description": "Download files with Blazma Get",
     "permissions": [
         "tabs",

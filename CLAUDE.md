@@ -28,6 +28,12 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
   quality list, `YtDlpSites` = video page patterns, mirrored as `VIDEO_PAGES` in the extension) and
   `YtDlpWindow` (quality picker). `/ytdl` in `BrowserIntegration` opens it; stream pieces on those
   sites are dropped in `VideoHelper.isStreamPieceOfVideoSite`.
+  Playlists: `YtDlpSites.hasPlaylist` (`list=`) adds a "whole playlist" tab to `YtDlpWindow`
+  (`YtDlpTool.fetchPlaylist` = `-J --flat-playlist`); each ticked video is its own quiet download
+  (`startYtDlpDownload(task, quiet = true)`: no progress window, a notification at the end) whose
+  format ids are yt-dlp selectors from `PlaylistPreset`. Without a JavaScript runtime YouTube offers
+  fewer formats; `VideoInfo.jsRuntimeMissing` shows a banner that installs Deno into `<config>/tools`
+  (`YtDlpTool.installDeno`, checksum-verified), passed to yt-dlp as `--js-runtimes deno:<path>`.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
   The installers ship a jlink runtime with only the modules in `packaging/build-bundle.{sh,ps1}`

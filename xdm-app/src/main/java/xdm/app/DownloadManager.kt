@@ -36,7 +36,8 @@ interface IDownloadManager {
     fun addVideoDownload(videoId: Long, fileName: String, folder: String?, autoSelectFolder: Boolean)
     fun startHlsDownload(task: HlsDownloadTaskInfo)
     fun startDashDownload(task: DashDownloadTaskInfo)
-    fun startYtDlpDownload(task: YtDlpDownloadTaskInfo)
+    /** [quiet]: one of many (a playlist), so no progress window and a notification, not a dialog, at the end. */
+    fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean = false)
     fun updateDownloadInfo(id: Long, task: HttpDownloadTaskInfo)
     fun getOriginPage(id: Long): String?
 }
@@ -56,6 +57,8 @@ class DownloadManager(
     private val queue = ArrayDeque<QueueItem>()
     /** Active downloads the user deleted: purged once their task reports it has stopped. */
     private val toDelete: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+    /** Downloads started as part of a batch (a playlist): they don't pop up windows of their own. */
+    private val quiet: MutableSet<Long> = ConcurrentHashMap.newKeySet()
 
     /**
      * Downloads whose publish the user asked to stop. The copy runs on the downloader's thread and
@@ -198,8 +201,11 @@ class DownloadManager(
                 }
                 AppContext.app.updateDownloadInView(event.id)
                 AppContext.app.hideProgressWindow(event.id)
+                val batch = quiet.remove(event.id)
                 when (AppContext.config.downloadCompleteNotification) {
-                    DownloadCompleteNotification.DIALOG -> AppContext.app.showDownloadCompleteWindow(
+                    DownloadCompleteNotification.DIALOG -> if (batch) {
+                        AppContext.app.showDownloadCompleteNotification(event.finalFileName)
+                    } else AppContext.app.showDownloadCompleteWindow(
                         event.id, event.finalOutputFolder, event.finalFileName, event.fileSize
                     )
 
@@ -562,7 +568,8 @@ class DownloadManager(
         DownloadType.YtDlp -> taskInfoDB.getYtDlpTask(id)?.let {
             YtDlpDownloaderTask(
                 task = it, host = host, toolPath = { YtDlpTool.ensure() },
-                muxer = TransmuxingMuxer(AppContext.configDir), config = AppContext.config
+                muxer = TransmuxingMuxer(AppContext.configDir), config = AppContext.config,
+                extraArgs = { YtDlpTool.denoArgs() }
             )
         }
 
@@ -591,7 +598,7 @@ class DownloadManager(
             appDB.saveActiveRecords()
             appDB.savePausedRecords()
             AppContext.app.updateDownloadInView(id)
-            if (AppContext.config.showDownloadProgressWindow) {
+            if (AppContext.config.showDownloadProgressWindow && id !in quiet) {
                 AppContext.app.showProgressWindow(id, rec.fileName)
             }
             if (item.resume) controller.resume() else controller.start()
@@ -621,6 +628,7 @@ class DownloadManager(
     }
 
     private fun deleteRecord(id: Long) {
+        quiet.remove(id)
         val index = appDB.indexById(id)
         if (index != null) {
             appDB.removeItem(id)
@@ -860,8 +868,9 @@ class DownloadManager(
         enqueue(task.id, resume = false)
     }
 
-    override fun startYtDlpDownload(task: YtDlpDownloadTaskInfo) {
+    override fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean) {
         val id = uniqueDownloadId(task.id)
+        if (quiet) this.quiet += id
         val t = task.copy(id = id, tempDir = AppContext.config.tempFolder + File.separator + id)
         taskInfoDB.saveYtDlpTask(t)
         appDB.addActive(

@@ -3,7 +3,9 @@ package xdm
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import xdm.app.ytdlp.PlaylistPreset
 import xdm.app.ytdlp.YtDlpFormats
+import xdm.app.ytdlp.YtDlpTool
 
 /** The quality picker, from `yt-dlp -J` output shaped like YouTube's and like a generic page's. */
 class YtDlpFormatsTest {
@@ -84,5 +86,50 @@ class YtDlpFormatsTest {
             "u"
         )
         assertEquals(listOf(listOf("c1"), listOf("a1")), info.options.map { it.formatIds })
+    }
+
+    @Test
+    fun flatPlaylist_givesAddressesTitlesAndLengths() {
+        val list = YtDlpFormats.parsePlaylist(
+            """
+            {"_type":"playlist","title":"دروس كوتلن","entries":[
+              {"_type":"url","ie_key":"Youtube","id":"aaa","url":"https://www.youtube.com/watch?v=aaa","title":"الدرس الأول","duration":61.0},
+              {"_type":"url","ie_key":"Youtube","id":"bbb","title":"الدرس الثاني"},
+              {"_type":"url","ie_key":"Generic","id":"ccc","url":"ccc"},
+              null
+            ]}
+            """
+        )
+        assertEquals("دروس كوتلن", list.title)
+        assertEquals(listOf("https://www.youtube.com/watch?v=aaa", "https://www.youtube.com/watch?v=bbb"), list.entries.map { it.url })
+        assertEquals(listOf("الدرس الأول", "الدرس الثاني"), list.entries.map { it.title })
+        assertEquals(61L, list.entries[0].durationSeconds)
+    }
+
+    @Test
+    fun singleVideo_isAnEmptyPlaylist() {
+        assertTrue(YtDlpFormats.parsePlaylist("""{"title":"one","formats":[]}""").entries.isEmpty())
+    }
+
+    @Test
+    fun playlistPresets_pickMp4VideoAndM4aPerVideo() {
+        val p720 = PlaylistPreset.all.first { it.height == 720 }
+        assertEquals("mp4", p720.ext)
+        assertEquals(2, p720.formatIds.size)
+        assertTrue(p720.formatIds[0].startsWith("bv[ext=mp4][vcodec^=avc1][height<=720]/"))
+        assertEquals("ba[ext=m4a]/ba[ext=mp4]", p720.formatIds[1])
+        val audio = PlaylistPreset.all.last()
+        assertTrue(audio.audioOnly)
+        assertEquals(listOf("ba[ext=m4a]/ba[ext=mp4]"), audio.formatIds)
+    }
+
+    @Test
+    fun denoAsset_matchesEachComputer() {
+        assertEquals("deno-x86_64-pc-windows-msvc.zip", YtDlpTool.denoAssetName("windows 11", false))
+        assertEquals("deno-x86_64-pc-windows-msvc.zip", YtDlpTool.denoAssetName("windows 11", true))
+        assertEquals("deno-aarch64-apple-darwin.zip", YtDlpTool.denoAssetName("mac os x", true))
+        assertEquals("deno-x86_64-apple-darwin.zip", YtDlpTool.denoAssetName("mac os x", false))
+        assertEquals("deno-x86_64-unknown-linux-gnu.zip", YtDlpTool.denoAssetName("linux", false))
+        assertEquals("deno-aarch64-unknown-linux-gnu.zip", YtDlpTool.denoAssetName("linux", true))
     }
 }

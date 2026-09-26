@@ -7,7 +7,7 @@ import Connector from './connector.js';
  * Video pages Blazma Get downloads with yt-dlp (quality picker), kept in sync with YtDlpSites.kt.
  */
 const VIDEO_PAGES = [
-    /^https?:\/\/(www\.|m\.|music\.)?youtube\.com\/(watch\?.*v=|shorts\/|live\/|embed\/)/i,
+    /^https?:\/\/(www\.|m\.|music\.)?youtube\.com\/(watch\?.*v=|shorts\/|live\/|embed\/|playlist\?.*list=)/i,
     /^https?:\/\/youtu\.be\/[\w-]+/i,
     /^https?:\/\/(www\.|mobile\.)?(twitter|x)\.com\/[^/]+\/status\/\d+/i,
     /^https?:\/\/(www\.)?instagram\.com\/(p|reel|reels|tv)\//i,

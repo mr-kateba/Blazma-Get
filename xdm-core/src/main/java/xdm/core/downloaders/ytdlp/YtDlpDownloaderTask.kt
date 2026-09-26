@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * then merged into one MP4 by the in-house transmuxer, so ffmpeg is never needed.
  *
  * [toolPath] returns the yt-dlp executable, downloading it first if needed; it may throw.
+ * [task]'s format ids may also be yt-dlp format selectors (`bv[ext=mp4][height<=720]`), as the
+ * playlist downloads use: each entry picks its own formats.
  */
 class YtDlpDownloaderTask(
     private val task: YtDlpDownloadTaskInfo,
@@ -30,6 +32,8 @@ class YtDlpDownloaderTask(
     private val toolPath: () -> String,
     private val muxer: Muxer,
     private val config: CoreConfig,
+    /** More yt-dlp options from the app, e.g. where its JavaScript runtime is. */
+    private val extraArgs: () -> List<String> = { emptyList() },
 ) : DownloaderTask {
     private val stopFlag = AtomicBoolean(false)
     private val started = AtomicBoolean(false)
@@ -210,6 +214,7 @@ class YtDlpDownloaderTask(
         }
         proxyUrl()?.let { cmd += listOf("--proxy", it) }
         task.cookie?.takeIf { it.isNotBlank() }?.let { cmd += listOf("--add-header", "Cookie:$it") }
+        cmd += runCatching(extraArgs).getOrDefault(emptyList())
         // "--" so a page address can never be read as an option.
         cmd += listOf("--", task.pageUrl)
         return cmd

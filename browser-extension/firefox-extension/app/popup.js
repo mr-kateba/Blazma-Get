@@ -12,6 +12,9 @@ const TEXT = AR ? {
     thisVideo: "فيديو هذي الصفحة",
     downloadVideo: "حمّل هذا الفيديو",
     qualityHint: "تختار الجودة (مثل 1080p) أو صوت فقط في النافذة اللي بتطلع.",
+    thisList: "قائمة تشغيل",
+    downloadList: "حمّل من القائمة",
+    listHint: "تقدر تحمّل الفيديو هذا أو القائمة كاملة، بالجودة اللي تبيها.",
     found: "الملفات اللي لقيناها",
     emptyTitle: "ما لقينا فيديو في هذي الصفحة",
     emptyHint: "شغّل الفيديو، أو اضغط تحديث الصفحة.",
@@ -31,6 +34,9 @@ const TEXT = AR ? {
     thisVideo: "Video on this page",
     downloadVideo: "Download this video",
     qualityHint: "Pick the quality (e.g. 1080p) or audio only in the window that opens.",
+    thisList: "Playlist",
+    downloadList: "Download from the playlist",
+    listHint: "Download this video or the whole playlist, in the quality you pick.",
     found: "Found on this page",
     emptyTitle: "No video found on this page",
     emptyHint: "Play the video, or click Reload page.",
@@ -107,6 +113,11 @@ class Popup {
         page.hidden = !r.videoPage;
         if (r.videoPage) {
             document.getElementById("pageTitle").textContent = r.tabTitle || r.tabUrl || "";
+            // A playlist (or a video played from one): the app offers the whole list too.
+            const list = /[?&]list=[\w-]+/.test(r.tabUrl || "");
+            document.querySelector('#page [data-t="thisVideo"]').textContent = list ? TEXT.thisList : TEXT.thisVideo;
+            document.querySelector('#page [data-t="downloadVideo"]').textContent = list ? TEXT.downloadList : TEXT.downloadVideo;
+            document.querySelector('#page [data-t="qualityHint"]').textContent = list ? TEXT.listHint : TEXT.qualityHint;
         }
 
         const list = r.list || [];

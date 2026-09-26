@@ -47,6 +47,7 @@
 - ✅ **تحقق من سلامة الملف** (SHA-256) من خصائص أي تحميل مكتمل
 - 🧩 **إضافة المتصفح داخل البرنامج**: من الإعدادات ← المتصفح اضغط على متصفحك، وتطلع لك الخطوات وزر يفتح مجلد الإضافة
 - ▶️ **تحميل من يوتيوب** ومواقع الفيديو (تويتر، إنستقرام، تيك توك، فيسبوك...) بالجودة اللي تختارها أو **صوت فقط**، بضغطة من إضافة المتصفح
+- 📃 **قوائم تشغيل يوتيوب كاملة**: كل الفيديوهات أو اللي تختارها منها، بجودة وحدة، في مجلد باسم القائمة
 - 🎬 **تحميل الفيديو** من المواقع اللي تدعم HLS وDASH، ويلتقط التحميلات من المتصفح (Chrome، Edge، Firefox، Brave وغيرها)
 - 🗂️ **ترتيب تلقائي**: البرامج والفيديو والصوتيات والملفات المضغوطة، كل نوع في مجلده
 - 🔒 **بدون إعلانات، بدون تتبع، بدون كراك**
@@ -137,6 +138,7 @@ Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.co
 - **SHA-256 check** of finished downloads, in the Properties dialog
 - **Browser extension built in**: Settings > Browser shows the steps and opens the extension folder
 - **YouTube and video sites** (X, Instagram, TikTok, Facebook...) in the quality you pick, or audio only, from the browser extension
+- **Whole YouTube playlists**: every video or the ones you tick, in one quality, into a folder named after the list
 - **Video downloads** (HLS, DASH) and browser integration for Chrome, Edge, Firefox, Brave and more
 - **Automatic categories** for programs, videos, music, archives and documents
 - No ads, no tracking
@@ -183,4 +185,4 @@ Every push is built and tested by [GitHub Actions](.github/workflows/build.yml);
 - Licensed under the [GNU General Public License v2.0](LICENSE), like XDM
 - Arabic UI font: [IBM Plex Sans Arabic](https://github.com/IBM/plex) (SIL Open Font License)
 - Icons: [Remix Icon](https://remixicon.com)
-- Video sites: [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense), downloaded on first use
+- Video sites: [yt-dlp](https://github.com/yt-dlp/yt-dlp) (Unlicense), downloaded on first use; optionally [Deno](https://deno.com) (MIT) for all of YouTube's qualities

@@ -45,4 +45,17 @@ class YtDlpSitesTest {
         val elsewhere = ExtensionMessage(url = "https://cdn.example.com/movie.mp4", tabUrl = "https://example.com/page")
         assertFalse(VideoHelper.isStreamPieceOfVideoSite(elsewhere))
     }
+
+    @Test
+    fun playlists_areRecognised() {
+        val listPage = "https://www.youtube.com/playlist?list=PLabc_123"
+        assertTrue(YtDlpSites.isVideoPage(listPage))
+        assertTrue(YtDlpSites.isPlaylistOnly(listPage))
+        assertTrue(YtDlpSites.hasPlaylist(listPage))
+        val fromList = "https://www.youtube.com/watch?v=abc&list=PLabc_123&index=2"
+        assertTrue(YtDlpSites.hasPlaylist(fromList))
+        assertFalse(YtDlpSites.isPlaylistOnly(fromList))
+        assertFalse(YtDlpSites.hasPlaylist("https://www.youtube.com/watch?v=abc"))
+        assertFalse(YtDlpSites.hasPlaylist("https://example.com/page?list=abc"))
+    }
 }
