@@ -15,8 +15,12 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
 - Blazma design system: colors in `ui/Blazma.kt` (use these tokens, not hard-coded colors), FlatLaf
   defaults in `AppMain.setupTheme`, widgets in `ui/components/BlazmaWidgets.kt` (`PrimaryButton`,
   `KeyButton`/`KeyToggle` = Blazma Boost's outlined keys via `Blazma.paintButton`, `SegmentedTabs`,
-  `StatusBar`). The theme switches live (`AppWindow.applyTheme` rebuilds the window content), so
-  read colors from `Blazma` at paint or build time, never cache them in statics and animations in `ui/components/Motion.kt`.
+  `StatusBar`) and animations in `ui/components/Motion.kt`. The theme switches live
+  (`AppWindow.applyTheme` rebuilds the window content), so read colors from `Blazma` at paint or
+  build time and never cache them in statics.
+- Engine fixes over upstream: chunk start under the context write lock (no duplicate chunk
+  threads on resume), a missing temp file restarts the download (`recoverMissingTempFile`), and a
+  disk error fails the download once instead of looping.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
 

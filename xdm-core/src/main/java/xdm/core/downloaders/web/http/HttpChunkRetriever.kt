@@ -214,6 +214,9 @@ class HttpChunkRetriever(
 
             CopyResult.DiskError -> {
                 Logger.info("XDM", "Chunk $id failed during copy_data - disk error")
+                // Fails the whole download (see HttpDownloaderTask.onChunkFailed): retrying a write
+                // to a missing folder or a full disk from the other chunks never succeeds.
+                context.diskError.set(true)
                 chunkFailed(DownloadError.DiskSpaceError)
                 false
             }
@@ -433,6 +436,8 @@ class HttpChunkRetriever(
             val chunk = context.chunks[id] ?: return null
             var fs: RandomAccessFile? = null
             try {
+                // The temp folder may have been removed since the download started.
+                File(context.tempFolder).mkdirs()
                 fs = RandomAccessFile(File(context.tempFolder, context.tempFileName), "rw")
                 context.totalSize?.let { len ->
                     if (!context.tempFileCreated.get()) {

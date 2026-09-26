@@ -203,6 +203,9 @@ class TestDownloadHost(
 
     val maxSegmentsSeen = AtomicInteger(0)
 
+    /** How many times the download reported a failure (it must be once per attempt). */
+    val failureCount = AtomicInteger(0)
+
     override fun getTempDir(id: Long, url: String, contentType: String?, contentDisposition: String?): String = tempDir
 
     override fun commitOutputFile(id: Long, tmpFilePath: String, downloadType: DownloadType): CommitResult {
@@ -240,6 +243,7 @@ class TestDownloadHost(
 
     override fun onDownloadFailed(id: Long, error: DownloadError) {
         failure = error
+        failureCount.incrementAndGet()
         latch.countDown()
     }
 

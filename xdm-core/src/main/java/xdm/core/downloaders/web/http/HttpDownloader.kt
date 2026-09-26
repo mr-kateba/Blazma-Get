@@ -39,6 +39,7 @@ fun makeContext(
     ).onSuccess {
         it.httpClient = httpClient
         normalizeRestoredChunks(it)
+        recoverMissingTempFile(it)
         return Pair(it, false)
     }
     Logger.info("Unable to load saved download state, starting new download: ${task.id}")
@@ -80,6 +81,23 @@ private fun normalizeRestoredChunks(ctx: HttpTaskContext) {
     }
 }
 
+/**
+ * The partial file can vanish while a download is paused (temp folder cleaned up, drive removed).
+ * Its chunks still claim their bytes, so resuming would keep failing to write, or write the rest
+ * into a new empty file and commit one with holes of zeros. Start the download over instead.
+ */
+private fun recoverMissingTempFile(ctx: HttpTaskContext) {
+    if (!ctx.tempFileCreated.get() || File(ctx.tempFolder, ctx.tempFileName).exists()) return
+    Logger.info("XDM", "Temp file of download ${ctx.id} is missing; restarting it from the beginning")
+    ctx.chunks.values.forEach {
+        it.downloaded.set(0)
+        it.status.set(ChunkStatus.Ready)
+    }
+    ctx.downloaded.set(0)
+    ctx.tempFileCreated.set(false)
+    ctx.completed.set(false)
+}
+
 class HttpDownloaderTask : ChunkController {
     private val context: HttpTaskContext
     private val configDir: String
@@ -87,6 +105,7 @@ class HttpDownloaderTask : ChunkController {
     private val throttle: SpeedLimiter
     private val stopRequested = AtomicBoolean(false)
     private val startRequested = AtomicBoolean(false)
+    private val failureReported = AtomicBoolean(false)
     private val config: CoreConfig
     private val maxChunk: Int
     private val newDownload: Boolean
@@ -136,6 +155,8 @@ class HttpDownloaderTask : ChunkController {
             return
         }
         startRequested.set(true)
+        // A disk error of an earlier attempt (saved with the state) must not fail this one.
+        context.diskError.set(false)
         Thread {
             context.downloadHost.onDownloadActivated(context.id)
             val id = CoreUtils.uniqueId()
@@ -249,6 +270,11 @@ class HttpDownloaderTask : ChunkController {
 
     override fun onChunkFailed(id: Long, error: DownloadError) {
         if (isAllError()) {
+            // Report once: chunks failing together would each see "all failed".
+            if (!failureReported.compareAndSet(false, true)) return
+            // A disk error fails the whole download while other chunks may still be running:
+            // stop them, or they restart the failed ones and retry the write forever.
+            if (context.diskError.get()) context.stopFlag.set(true)
             Logger.error("XDM", "All chunks failed, stopping download - error: $error")
             val finalError =
                 if (error == DownloadError.InvalidResponse && context.downloaded.get() > 0 && context.chunks.size > 2) {
