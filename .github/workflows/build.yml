@@ -1,5 +1,6 @@
 # Builds Blazma Get on every push and pull request, and publishes a GitHub release with the
-# Windows installer when a version tag (v1.2.3) is pushed.
+# Windows installer when a version tag (v1.2.3) is pushed, or when the workflow is run by hand
+# (Actions > Build > Run workflow) with a version number: the release then creates the tag.
 name: Build
 
 on:
@@ -8,12 +9,21 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Publish a release with this version (e.g. 1.0.0). Leave empty to only build."
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
+env:
+  # The release tag (v1.2.3) when this run publishes one, empty otherwise.
+  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || (github.event_name == 'workflow_dispatch' && inputs.release_version != '' && format('v{0}', inputs.release_version)) || '' }}
+
 concurrency:
-  group: build-${{ github.ref }}
+  group: build-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -64,8 +74,8 @@ jobs:
         run: |
           $file = 'xdm-app/src/main/resources/app-version.json'
           $json = Get-Content $file -Raw | ConvertFrom-Json
-          if ($env:GITHUB_REF_TYPE -eq 'tag') {
-            $json.currentVersion = $env:GITHUB_REF_NAME.TrimStart('v')
+          if ($env:RELEASE_TAG) {
+            $json.currentVersion = $env:RELEASE_TAG.TrimStart('v')
             $json | ConvertTo-Json | Set-Content $file -Encoding utf8
           }
           "APP_VERSION=$($json.currentVersion)" >> $env:GITHUB_ENV
@@ -108,9 +118,9 @@ jobs:
           cache: maven
 
       - name: Set version
-        if: github.ref_type == 'tag'
+        if: env.RELEASE_TAG != ''
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           sed -i "s/\"currentVersion\": *\"[^\"]*\"/\"currentVersion\": \"$version\"/" xdm-app/src/main/resources/app-version.json
 
       - name: Build .deb
@@ -126,7 +136,7 @@ jobs:
 
   release:
     name: GitHub release
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && inputs.release_version != '')
     needs: [test, windows, linux]
     runs-on: ubuntu-latest
     permissions:
@@ -142,20 +152,22 @@ jobs:
       # Release notes come from docs/release-notes/<tag>.md when that file exists.
       - name: Release notes
         run: |
-          notes="docs/release-notes/${GITHUB_REF_NAME}.md"
+          notes="docs/release-notes/${RELEASE_TAG}.md"
           [ -f "$notes" ] || notes=""
           echo "NOTES_FILE=$notes" >> "$GITHUB_ENV"
 
       # The jar artifact keeps its xdm-app/target/ path (it was uploaded with the extension zips).
       - name: Name the jar
         run: |
-          mv dist/xdm-app/target/xdm-app.jar "dist/BlazmaGet-${GITHUB_REF_NAME#v}.jar"
+          mv dist/xdm-app/target/xdm-app.jar "dist/BlazmaGet-${RELEASE_TAG#v}.jar"
           rm -rf dist/xdm-app
           ls -la dist
 
       - uses: softprops/action-gh-release@v2
         with:
-          name: Blazma Get ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Blazma Get ${{ env.RELEASE_TAG }}
           generate_release_notes: true
           body_path: ${{ env.NOTES_FILE }}
           body: |
