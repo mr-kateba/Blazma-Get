@@ -33,6 +33,8 @@ class GeneralPanel : SettingsPanel() {
         )
     )
 
+    private val tglClipboard = SettingsToggle()
+
     private val themeCodes = listOf("dark", "light")
     private val optTheme = SettingsOptionGroup(
         listOf(
@@ -59,6 +61,7 @@ class GeneralPanel : SettingsPanel() {
                 settingsRow(I8N.text("SHOW_DWN_PRG"), I8N.text("SHOW_DWN_PRG_SUB"), tglShowDwnPrg),
                 settingsRow(I8N.text("LBL_START_AUTO"), I8N.text("LBL_START_AUTO_SUB"), tglStartAutoDwn),
                 settingsRow(I8N.text("LBL_OVERWRITE_EXISTING"), I8N.text("LBL_OVERWRITE_EXISTING_SUB"), tglOverwrite),
+                settingsRow(I8N.text("MSG_MONITOR_CLIPBOARD"), I8N.text("MSG_MONITOR_CLIPBOARD_SUB"), tglClipboard),
             )
         )
         add(settingsGap())
@@ -100,6 +103,7 @@ class GeneralPanel : SettingsPanel() {
         tglShowDwnPrg.isSelected = config.showDownloadProgressWindow
         tglStartAutoDwn.isSelected = config.startDownloadAutomatically
         tglOverwrite.isSelected = config.overwriteExistingFiles
+        tglClipboard.isSelected = config.monitorClipboard
         optOnComplete.selected = config.downloadCompleteNotification
         optTheme.selected = config.theme.lowercase().takeIf { themeCodes.contains(it) } ?: "dark"
         langProp[config.lang]?.let { cmbLang.selectedItem = it }
@@ -110,6 +114,7 @@ class GeneralPanel : SettingsPanel() {
         config.showDownloadProgressWindow = tglShowDwnPrg.isSelected
         config.startDownloadAutomatically = tglStartAutoDwn.isSelected
         config.overwriteExistingFiles = tglOverwrite.isSelected
+        config.monitorClipboard = tglClipboard.isSelected
         config.downloadCompleteNotification = optOnComplete.selected
         config.theme = optTheme.selected
         for (key in langProp.keys) {

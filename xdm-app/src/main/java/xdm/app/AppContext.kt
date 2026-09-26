@@ -9,6 +9,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 object AppContext {
+    /** Local port the browser extension talks to (shared with XDM, so its extension works too). */
+    const val INTEGRATION_PORT = 8597
+
 
     lateinit var db: AppDB
     lateinit var app: IAppInstance
@@ -31,6 +34,24 @@ object AppContext {
 
     var refreshLinkInProgress = AtomicBoolean(false)
     var refreshLinkId = AtomicLong(-1)
+
+    /**
+     * Quits the app: pauses running downloads and gives them a few seconds to save their state,
+     * so they resume from the same point next time.
+     */
+    fun exitApp() {
+        Thread {
+            runCatching {
+                downloader.stopAll()
+                val deadline = System.currentTimeMillis() + 5_000
+                while (downloader.activeCount > 0 && System.currentTimeMillis() < deadline) Thread.sleep(100)
+                db.saveActiveRecords()
+                db.savePausedRecords()
+                config.save()
+            }.onFailure { Logger.error("Error while exiting", it) }
+            kotlin.system.exitProcess(0)
+        }.apply { name = "exit" }.start()
+    }
 
     fun init(args: Array<String>, configDir: String, tempDir: String) {
         this.configDir = configDir
@@ -77,9 +98,12 @@ object AppContext {
                 {
                     db.loadRecords()
                     app.run(args)
+                    downloader.autoResume.restore { id -> db.getById(id)?.status == RecordStatus.PAUSED }
                 },
                 {
-                    println("Unable to start server")
+                    // Port taken: usually Blazma Get is already running (closing the window only
+                    // hides it in the tray). Bring that copy to the front instead of exiting silently.
+                    SingleInstance.handOff()
                 })
             return
         }

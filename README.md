@@ -40,6 +40,10 @@
 - 🐢 **تحديد السرعة بضغطة** من الشريط العلوي، عشان التحميل ما ياكل النت على باقي البيت
 - 🌙 **جدولة التحميل**: خلّه يبدأ الساعة 2 بالليل لما النت يكون أسرع، ويوقف الساعة 7 الصبح، مرة وحدة أو كل أسبوع
 - 🔔 **إشعار لما يخلص التحميل** (نافذة، أو إشعار من ويندوز، أو بدون)
+- 📋 **يراقب الروابط المنسوخة**: انسخ رابط أي ملف (zip أو exe أو mp4...) من أي مكان، والبرنامج يعرض عليك تحميله مثل IDM
+- 🖱️ **اسحب الرابط وأفلته** على نافذة البرنامج، أو اضغط **Ctrl+V** لتحميل الرابط المنسوخ، و**Ctrl+N** لتحميل جديد
+- ✅ **تحقق من سلامة الملف** (SHA-256) من خصائص أي تحميل مكتمل
+- 🧩 **إضافة المتصفح داخل البرنامج**: من الإعدادات ← المتصفح اضغط على متصفحك، وتطلع لك الخطوات وزر يفتح مجلد الإضافة
 - 🎬 **تحميل الفيديو** من المواقع اللي تدعم HLS وDASH، ويلتقط التحميلات من المتصفح (Chrome، Edge، Firefox، Brave وغيرها)
 - 🗂️ **ترتيب تلقائي**: البرامج والفيديو والصوتيات والملفات المضغوطة، كل نوع في مجلده
 - 🔒 **بدون إعلانات، بدون تتبع، بدون كراك**
@@ -74,10 +78,10 @@
 
 عشان يلتقط التحميلات والفيديوهات من المتصفح:
 
-1. من صفحة الإصدار نزّل `BlazmaGet-Chrome-Extension.zip` وفك الضغط
-2. افتح `chrome://extensions` (أو `edge://extensions`) وفعّل **وضع المطوّر** (Developer mode)
-3. اضغط **Load unpacked** واختر المجلد اللي فكّيته
-4. خلّ Blazma Get شغّال، وأي تحميل من المتصفح بيروح له مباشرة
+1. في Blazma Get افتح **الإعدادات ← المتصفح** واضغط على متصفحك (Chrome أو Edge أو Firefox)
+2. اضغط **افتح مجلد الإضافة**
+3. افتح `chrome://extensions` (أو `edge://extensions`) وفعّل **وضع المطوّر** (Developer mode)
+4. اضغط **Load unpacked** واختر المجلد، وخلّ Blazma Get شغّال، وأي تحميل من المتصفح بيروح له مباشرة
 
 ### 🛠️ للمطوّرين
 
@@ -119,6 +123,10 @@ Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.co
 - **One-click speed limit** in the toolbar, so one download does not eat the whole home connection
 - **Scheduler**: start at 2 AM when the line is faster, stop at 7 AM; once or weekly
 - **Completion notice**: a dialog, a system notification, or nothing
+- **Clipboard monitor**: copy a link to a file anywhere and Blazma Get offers to download it, like IDM
+- **Drag and drop** links onto the window, **Ctrl+V** to download the copied link, **Ctrl+N** for a new download
+- **SHA-256 check** of finished downloads, in the Properties dialog
+- **Browser extension built in**: Settings > Browser shows the steps and opens the extension folder
 - **Video downloads** (HLS, DASH) and browser integration for Chrome, Edge, Firefox, Brave and more
 - **Automatic categories** for programs, videos, music, archives and documents
 - No ads, no tracking

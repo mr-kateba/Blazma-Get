@@ -42,6 +42,9 @@ interface IAppInstance {
 
     fun addDownload(downloadInfo: HttpDownloadTaskInfo?)
 
+    /** Opens the New download dialog for [url] (clipboard monitor, drag and drop, Ctrl+V). */
+    fun addDownloadFromUrl(url: String)
+
     fun addVideoDownload(vid: Long, fileName: String, fileSize: Long?, fileType: String?)
 
     fun showProgressWindow(id: Long, fileName: String)
@@ -82,6 +85,8 @@ class AppInstance : IAppInstance {
     override fun run(args: Array<String>) {
         runOnUIThread {
             TextContextMenu.install()
+            xdm.app.ui.WindowKeys.install()
+            ClipboardMonitor.start()
             val image = logoImage(256)
             appWindow = AppWindow(image)
             createTray(image)
@@ -92,7 +97,10 @@ class AppInstance : IAppInstance {
     override fun showAppWindow() {
         runOnUIThread {
             appWindow.isVisible = true
+            // Restore it if it was minimized, then bring it in front of other windows.
+            appWindow.extendedState = appWindow.extendedState and java.awt.Frame.ICONIFIED.inv()
             appWindow.toFront()
+            appWindow.requestFocus()
         }
     }
 
@@ -155,6 +163,10 @@ class AppInstance : IAppInstance {
         SwingUtilities.invokeLater {
             showNewVideoDownloadWindowInternal(vid, fileName, fileSize, contentType)
         }
+    }
+
+    override fun addDownloadFromUrl(url: String) {
+        runOnUIThread { NewDownloadWindow().showWindow(null, url) }
     }
 
     private fun showNewDownloadWindowInternal(downloadInfo: HttpDownloadTaskInfo?) {

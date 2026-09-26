@@ -42,11 +42,19 @@ object BrowserIntegration {
         "extension://",
         "safari-web-extension://"
     )
-    private val stateChangingPaths = setOf("/download", "/media", "/vid", "/clear", "/tab-update", "/poll")
+    private val stateChangingPaths = setOf("/download", "/media", "/vid", "/clear", "/tab-update", "/poll", SHOW_PATH)
+
+    /**
+     * Sent by a second launch of the app: brings this instance's window to the front. The reply
+     * body identifies Blazma Get, so a different program on the same port (XDM) is not mistaken
+     * for a running copy.
+     */
+    const val SHOW_PATH = "/show"
+    const val SHOW_REPLY = "blazma-get"
 
     fun start(onSuccess: Runnable?, onFailure: Runnable?) {
         server = HttpServer(
-            "127.0.0.1", 8597,
+            "127.0.0.1", AppContext.INTEGRATION_PORT,
             ::handleRequest,
             { onSuccess?.run() },
             { onFailure?.run() })
@@ -77,6 +85,16 @@ object BrowserIntegration {
         }
         if (context.requestPath == "/poll") {
             onPollMessage(context)
+            return
+        }
+        if (context.requestPath == SHOW_PATH) {
+            AppContext.app.showAppWindow()
+            context.apply {
+                statusCode = 200
+                statusMessage = "OK"
+                addResponseHeader("Content-Type", "text/plain")
+                responseBody = SHOW_REPLY.toByteArray(StandardCharsets.UTF_8)
+            }.sendResponse()
             return
         }
         when (context.requestPath) {

@@ -70,7 +70,9 @@ fun showMenu(target: Component, menu: JPopupMenu) {
     menu.pack()
     val menuWidth = menu.preferredSize.width
     val targetWidth = target.preferredSize.width
-    val x = targetWidth - menuWidth
+    // Line the menu up with the button's outer edge: its right edge in LTR, its left edge in RTL
+    // (where these buttons sit at the left of the window), so the menu opens inside the window.
+    val x = if (target.componentOrientation.isLeftToRight) targetWidth - menuWidth else 0
     menu.invoker = target
     menu.show(target, x, target.height)
 }

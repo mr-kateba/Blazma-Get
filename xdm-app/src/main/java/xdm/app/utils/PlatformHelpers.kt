@@ -35,8 +35,18 @@ fun createTray(image: Image) {
     val trayImage = if (detectOS() == OS.MacOS) createMacTrayImage(tray) else image
     val trayIcon = TrayIcon(trayImage)
     trayIcon.isImageAutoSize = true
+    trayIcon.toolTip = xdm.app.APP_NAME
+    // Right-click menu: without it a user who closed the window (which only hides it) had no way
+    // to quit or start a download from the tray.
+    trayIcon.popupMenu = java.awt.PopupMenu().apply {
+        add(java.awt.MenuItem(xdm.app.I8N.text("TRAY_OPEN")).apply { addActionListener { app.showAppWindow() } })
+        add(java.awt.MenuItem(xdm.app.I8N.text("TRAY_NEW")).apply { addActionListener { app.addDownload(null) } })
+        addSeparator()
+        add(java.awt.MenuItem(xdm.app.I8N.text("MENU_EXIT")).apply { addActionListener { xdm.app.AppContext.exitApp() } })
+    }
     trayIcon.addMouseListener(object : MouseAdapter() {
         override fun mouseClicked(e: MouseEvent?) {
+            if (e?.button != MouseEvent.BUTTON1) return
             Logger.info("Tray icon was clicked")
             app.showAppWindow()
         }
@@ -141,6 +151,7 @@ fun getClipBoardText(): String? {
 }
 
 fun setClipBoardText(text: String) {
+    xdm.app.ClipboardMonitor.ignore(text)
     try {
         return Toolkit.getDefaultToolkit().systemClipboard
             .setContents(StringSelection(text), null)

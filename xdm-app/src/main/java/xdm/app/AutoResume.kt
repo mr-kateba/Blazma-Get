@@ -26,6 +26,8 @@ class AutoResume(
     private val clock: () -> Long = System::currentTimeMillis,
     /** Probe from a background thread; tests turn it off and call [checkNow] themselves. */
     private val background: Boolean = true,
+    /** Where the waiting downloads are remembered across restarts (null: not remembered). */
+    private val store: java.io.File? = null,
 ) {
     private class Watch(val attempts: Int, val nextCheckAt: Long)
 
@@ -52,21 +54,41 @@ class AutoResume(
         attemptsSoFar[id] = attempts
         watches[id] = Watch(attempts, clock() + delayFor(attempts))
         Logger.info("AutoResume", "Download $id lost its connection, waiting for the network (attempt $attempts)")
+        persist()
         if (background) ensureThread()
+    }
+
+    /**
+     * After a restart, keeps waiting for the downloads that were waiting when the app closed
+     * (the internet was still down), as long as they are still paused.
+     */
+    fun restore(stillPaused: (Long) -> Boolean) {
+        val ids = runCatching { store?.readLines()?.mapNotNull { it.trim().toLongOrNull() } }.getOrNull() ?: return
+        ids.filter(stillPaused).forEach { watch(it) }
+        persist()
+    }
+
+    private fun persist() {
+        val file = store ?: return
+        runCatching { file.writeText(watches.keys.joinToString("\n")) }
+            .onFailure { Logger.error("AutoResume", "Unable to save $file", it) }
     }
 
     /** Stops watching [id] and resets its attempt count (the user took over, or it finished). */
     fun forget(id: Long) {
-        watches.remove(id)
+        val wasWatched = watches.remove(id) != null
         attemptsSoFar.remove(id)
+        if (wasWatched) persist()
     }
 
     /** One probe round; resumes every due download whose server is reachable again. */
     fun checkNow() {
         if (!enabled()) {
             watches.clear()
+            persist()
             return
         }
+        val before = watches.size
         val now = clock()
         for ((id, w) in watches.entries.toList()) {
             if (w.nextCheckAt > now) continue
@@ -83,6 +105,7 @@ class AutoResume(
                 watches[id] = Watch(w.attempts, now + PROBE_INTERVAL_MS)
             }
         }
+        if (watches.size != before) persist()
     }
 
     /** Attempts are remembered after a resume so a download that keeps failing still gives up. */

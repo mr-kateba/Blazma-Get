@@ -88,6 +88,27 @@ class AutoResumeTest {
     }
 
     @Test
+    fun waitingDownloadsSurviveARestart() {
+        val store = Files.createTempFile("auto-resume", ".txt").toFile()
+        fun make() = AutoResume(
+            resume = { resumed.add(it) }, urlOf = { "https://files.example.com/$it.iso" },
+            enabled = { true }, probe = { _, _ -> online }, clock = { now }, background = false, store = store,
+        )
+        make().apply { watch(7); watch(8); forget(8) }
+
+        val afterRestart = make()
+        afterRestart.restore { id -> id != 9L }
+        assertTrue(afterRestart.isWaiting(7))
+        assertFalse("forgotten before the restart", afterRestart.isWaiting(8))
+
+        online = true
+        now += 600_000
+        afterRestart.checkNow()
+        assertEquals(listOf(7L), resumed)
+        assertTrue("nothing left to restore", store.readText().isBlank())
+    }
+
+    @Test
     fun downloadWithoutAddressIsDropped() {
         auto.watch(404)
         now += 600_000

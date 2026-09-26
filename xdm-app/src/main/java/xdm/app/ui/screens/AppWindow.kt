@@ -6,6 +6,8 @@ import xdm.app.AppContext
 import xdm.app.AppContext.app
 import xdm.app.XDM_WINDOW_TITLE
 import xdm.app.DbRecord
+import xdm.app.DownloadLinks
+import xdm.app.utils.getClipBoardText
 import xdm.app.I8N.text
 import xdm.app.OS
 import xdm.app.ui.components.AppMenuHandler
@@ -20,6 +22,7 @@ import xdm.core.util.Logger
 import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.awt.event.KeyEvent
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.border.MatteBorder
@@ -122,7 +125,59 @@ class AppWindow(image: Image) : JFrame(), ActionListener {
         add(splitPane, BorderLayout.CENTER)
         add(updatePanel, BorderLayout.SOUTH)
 
+        installLinkDrop(this)
+        installShortcuts()
+
         ToolTipManager.sharedInstance().initialDelay = 500
+    }
+
+    /**
+     * Dropping a link (or text holding one) anywhere on the window opens a new download. Set on
+     * every component, because Swing delivers a drop to the innermost one (the list's JTable would
+     * otherwise refuse it); text fields keep their own handler so dragging text into them works.
+     */
+    private fun installLinkDrop(root: java.awt.Container) {
+        val handler = object : TransferHandler() {
+            override fun canImport(support: TransferSupport) =
+                support.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.stringFlavor)
+
+            override fun importData(support: TransferSupport): Boolean {
+                val text = runCatching {
+                    support.transferable.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor) as String
+                }.getOrNull() ?: return false
+                val url = DownloadLinks.extract(text).firstOrNull() ?: return false
+                app.addDownloadFromUrl(url)
+                return true
+            }
+        }
+        fun apply(c: java.awt.Component) {
+            if (c is javax.swing.text.JTextComponent) return
+            if (c is JComponent) c.transferHandler = handler
+            if (c is java.awt.Container) c.components.forEach { apply(it) }
+        }
+        rootPane.transferHandler = handler
+        apply(root)
+    }
+
+    /** Ctrl+N new download, Ctrl+V download the copied link, Delete remove the selected downloads. */
+    private fun installShortcuts() {
+        val menuKey = java.awt.Toolkit.getDefaultToolkit().menuShortcutKeyMaskEx
+        fun bind(key: KeyStroke, name: String, action: () -> Unit) {
+            rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(key, name)
+            rootPane.actionMap.put(name, object : AbstractAction() {
+                override fun actionPerformed(e: ActionEvent) = action()
+            })
+        }
+        bind(KeyStroke.getKeyStroke(KeyEvent.VK_N, menuKey), "blazma.new") { app.addDownload(null) }
+        // Text fields handle their own Ctrl+V and Delete first, so these only fire on the list.
+        bind(KeyStroke.getKeyStroke(KeyEvent.VK_V, menuKey), "blazma.paste") {
+            getClipBoardText()?.let { DownloadLinks.extract(it).firstOrNull() }
+                ?.let { app.addDownloadFromUrl(it) }
+        }
+        bind(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "blazma.delete") {
+            val selected = listView.selectedItems
+            if (selected.isNotEmpty()) AppMenuHandler.deleteSelectedDownloads(selected, this)
+        }
     }
 
     fun updateDownloadInView(index: Int) {

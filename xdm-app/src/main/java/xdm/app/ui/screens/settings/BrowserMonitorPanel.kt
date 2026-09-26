@@ -47,10 +47,12 @@ class BrowserMonitorPanel : SettingsPanel() {
         val browsers = JPanel(GridLayout(1, 4, 10, 0)).apply {
             isOpaque = false
             alignmentX = LEFT_ALIGNMENT
-            add(BrowserTile(RemixIcon.CHROME_FILL, "Chrome", Color(0x4285F4)))
-            add(BrowserTile(RemixIcon.FIREFOX_FILL, "Firefox", Color(0xFF7139)))
-            add(BrowserTile(RemixIcon.EDGE_NEW_FILL, "Edge", Color(0x24B0C4)))
-            add(BrowserTile(RemixIcon.GLOBAL_FILL, I8N.text("SETTINGS_BROWSER_OTHER"), settingsAccentColor()))
+            add(BrowserTile(RemixIcon.CHROME_FILL, "Chrome", Color(0x4285F4)) { showSetup(ExtensionBrowser.CHROME) })
+            add(BrowserTile(RemixIcon.FIREFOX_FILL, "Firefox", Color(0xFF7139)) { showSetup(ExtensionBrowser.FIREFOX) })
+            add(BrowserTile(RemixIcon.EDGE_NEW_FILL, "Edge", Color(0x24B0C4)) { showSetup(ExtensionBrowser.EDGE) })
+            add(BrowserTile(RemixIcon.GLOBAL_FILL, I8N.text("SETTINGS_BROWSER_OTHER"), settingsAccentColor()) {
+                showSetup(ExtensionBrowser.OTHER)
+            })
         }
         add(
             settingsSection(
@@ -150,7 +152,16 @@ class BrowserMonitorPanel : SettingsPanel() {
     override fun getInsets(): Insets = Insets(18, 24, 24, 24)
 
     /** A rounded browser "tile": brand-tinted icon over a name, with a hover highlight. */
-    private class BrowserTile(iconName: RemixIcon, label: String, private val accent: Color) : JPanel() {
+    private fun showSetup(browser: ExtensionBrowser) {
+        ExtensionSetupDialog(SwingUtilities.getWindowAncestor(this), browser).isVisible = true
+    }
+
+    private class BrowserTile(
+        iconName: RemixIcon,
+        label: String,
+        private val accent: Color,
+        private val onClick: () -> Unit,
+    ) : JPanel() {
         private var hovered = false
 
         init {
@@ -173,6 +184,10 @@ class BrowserMonitorPanel : SettingsPanel() {
                 override fun mouseEntered(e: MouseEvent) {
                     hovered = true
                     repaint()
+                }
+
+                override fun mouseClicked(e: MouseEvent) {
+                    onClick()
                 }
 
                 override fun mouseExited(e: MouseEvent) {

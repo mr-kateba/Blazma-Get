@@ -246,7 +246,10 @@ class NewDownloadWindow : JDialog() {
             val folder = selectedBaseFolder(cmbSaveIn)
             if (selectedFolder != folder) {
                 selectedFolder = folder
-                val freeSpace = File(folder).freeSpace
+                // A folder that does not exist yet reports 0; measure the drive through its
+                // nearest existing parent instead.
+                val existing = generateSequence(File(folder).absoluteFile) { it.parentFile }.firstOrNull { it.exists() }
+                val freeSpace = existing?.freeSpace ?: 0L
                 lblFreeSpace.text = "${text("MSG_FREE_SPACE")} ${UiLocale.ltr(FormatHelper.formatSize(freeSpace.toDouble()))}"
             }
         }
@@ -424,16 +427,16 @@ class NewDownloadWindow : JDialog() {
         dispose()
     }
 
-    fun showWindow(taskInfo: HttpDownloadTaskInfo?) {
+    fun showWindow(taskInfo: HttpDownloadTaskInfo?, url: String? = null) {
         this.adjustSize()
         this.setLocationRelativeTo(null)
 
         btnIgnore.isVisible = taskInfo != null
         populateSaveInFolders(modelSaveIn, cmbSaveIn)
         if (taskInfo == null) {
-            val url = getClipBoardText()
-            if (url != null && validateURL(url)) {
-                txtUrl.text = url
+            val address = url ?: getClipBoardText()?.trim()
+            if (address != null && validateURL(address)) {
+                txtUrl.text = address
             }
             this.taskInfo = null
         } else {

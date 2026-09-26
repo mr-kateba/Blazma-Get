@@ -17,15 +17,22 @@ class HttpServer(
 
     fun start() {
         Thread {
+            // Only a failed bind means "the port is taken" (onFailure hands off to a running copy);
+            // an error while starting the UI must not be reported as that.
             try {
                 serverSocket.bind(InetSocketAddress(host, port))
-                onSuccess()
-                while (!serverSocket.isClosed) {
-                    process()
-                }
             } catch (ex: Exception) {
                 Logger.info(ex)
                 onFailure()
+                return@Thread
+            }
+            try {
+                onSuccess()
+            } catch (ex: Exception) {
+                Logger.error("INTEGRATION", "Startup failed", ex)
+            }
+            while (!serverSocket.isClosed) {
+                process()
             }
         }.start()
     }

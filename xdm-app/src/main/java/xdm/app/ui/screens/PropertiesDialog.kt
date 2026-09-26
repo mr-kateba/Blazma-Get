@@ -8,6 +8,9 @@ import xdm.app.RecordStatus
 import xdm.app.utils.RemixIcon
 import xdm.app.utils.createIcon
 import xdm.app.utils.setClipBoardText
+import xdm.app.utils.FileChecksum
+import xdm.app.utils.getFileFolder
+import java.io.File
 import xdm.core.downloaders.DownloadType
 import xdm.core.util.FormatHelper
 import java.awt.*
@@ -54,6 +57,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
         addRow(panel, row++, text("PROP_SIZE"), sizeText)
         addRow(panel, row++, text("PROP_DATE"), dateText)
         addRow(panel, row++, text("PROP_COMPLETED"), if (finished) text("MB_YES") else text("MB_NO"))
+        if (finished) addChecksumRow(panel, row++, ent)
 
         val btnClose = JButton(text("LBL_CLOSE")).apply {
             addActionListener { dispose() }
@@ -75,6 +79,65 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
         pack()
         size = Dimension(500, 300)
         setLocationRelativeTo(owner)
+    }
+
+    /**
+     * SHA-256 of the downloaded file, computed on request (it reads the whole file) off the EDT.
+     * Websites often publish it so users can check a download is complete and untampered.
+     */
+    private fun addChecksumRow(panel: JPanel, row: Int, ent: DbRecord) {
+        panel.add(JLabel("SHA-256:").apply { font = font.deriveFont(Font.BOLD) }, GridBagConstraints().apply {
+            gridx = 0; gridy = row
+            anchor = GridBagConstraints.FIRST_LINE_START
+            insets = Insets(6, 6, 6, 12)
+        })
+        val holder = JPanel(BorderLayout()).apply { isOpaque = false }
+        val btn = JButton(text("PROP_CHECKSUM_CALC"))
+        holder.add(btn, BorderLayout.LINE_START)
+        btn.addActionListener {
+            btn.isEnabled = false
+            btn.text = text("PROP_CHECKSUM_WORKING")
+            object : SwingWorker<String?, Unit>() {
+                override fun doInBackground(): String? {
+                    val (name, folder) = getFileFolder(ent) ?: return null
+                    val file = File(folder ?: return null, name ?: return null)
+                    return if (file.isFile) FileChecksum.sha256(file) else null
+                }
+
+                override fun done() {
+                    val hash = runCatching { get() }.getOrNull()
+                    holder.removeAll()
+                    if (hash == null) {
+                        holder.add(JLabel(text("ERR_MSG_FILE_NOT_FOUND")), BorderLayout.LINE_START)
+                    } else {
+                        val field = UiLocale.keepLtr(JTextField(hash).apply {
+                            isEditable = false
+                            border = null
+                            isOpaque = false
+                            columns = 28
+                            font = Font(Font.MONOSPACED, Font.PLAIN, font.size)
+                        })
+                        field.caretPosition = 0
+                        holder.add(field, BorderLayout.CENTER)
+                        holder.add(JButton(createIcon(RemixIcon.FILE_LINE, 14, Color.GRAY)).apply {
+                            toolTipText = text("CTX_COPY")
+                            margin = Insets(2, 4, 2, 4)
+                            addActionListener { setClipBoardText(hash) }
+                        }, BorderLayout.LINE_END)
+                    }
+                    holder.revalidate()
+                    holder.repaint()
+                    pack()
+                }
+            }.execute()
+        }
+        panel.add(holder, GridBagConstraints().apply {
+            gridx = 1; gridy = row
+            anchor = GridBagConstraints.LINE_START
+            fill = GridBagConstraints.HORIZONTAL
+            weightx = 1.0
+            insets = Insets(6, 0, 6, 6)
+        })
     }
 
     private fun addRow(panel: JPanel, row: Int, label: String, value: String, copyable: Boolean = false) {

@@ -110,6 +110,17 @@
 
     <build>
         <finalName>xdm-app-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The browser extensions ship inside the app; the settings page extracts one for
+                 the user to load in their browser. -->
+            <resource>
+                <directory>../browser-extension</directory>
+                <targetPath>extension</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

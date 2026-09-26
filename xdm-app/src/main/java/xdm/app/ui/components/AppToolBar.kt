@@ -26,7 +26,6 @@ import javax.swing.JToggleButton
 import javax.swing.JToolBar
 import javax.swing.SwingUtilities
 import javax.swing.UIManager
-import kotlin.system.exitProcess
 
 class AppToolBar(
     searchCallback: (String) -> Unit,
@@ -220,9 +219,7 @@ class AppToolBar(
                     AboutDialog(SwingUtilities.windowForComponent(toolbar)).isVisible = true
                 }
 
-                "MENU_EXIT" -> {
-                    exitProcess(0)
-                }
+                "MENU_EXIT" -> AppContext.exitApp()
             }
         }
     }

@@ -62,7 +62,11 @@ class DownloadManager(
     private val activeSessions = ConcurrentHashMap<Long, DownloaderTask>()
 
     /** Brings back downloads that failed because the connection dropped. See [AutoResume]. */
-    val autoResume = AutoResume(resume = ::resumeQueued, urlOf = ::downloadUrl)
+    val autoResume = AutoResume(
+        resume = ::resumeQueued,
+        urlOf = ::downloadUrl,
+        store = File(configDir, "auto-resume.txt"),
+    )
     private val downloadHost = object : DownloadHost {
         override fun onDownloadActivated(id: Long) {
             activeSessions[id]?.let {
@@ -467,6 +471,16 @@ class DownloadManager(
     private fun recordOutputPath(id: Long, path: String) {
         runCatching { File(configDir, "$id.out").writeText(path) }
             .onFailure { Logger.error("XDM", "Unable to record output path for $id", it) }
+    }
+
+    /** Downloads currently running (not queued). */
+    val activeCount: Int
+        get() = activeSessions.size
+
+    /** Pauses every running download, e.g. before the app exits, so their progress is saved. */
+    fun stopAll() {
+        synchronized(queue) { queue.clear() }
+        activeSessions.keys.toList().forEach { stopDownload(it) }
     }
 
     override fun stopDownload(id: Long) {
