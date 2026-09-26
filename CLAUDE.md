@@ -21,6 +21,13 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
 - Engine fixes over upstream: chunk start under the context write lock (no duplicate chunk
   threads on resume), a missing temp file restarts the download (`recoverMissingTempFile`), and a
   disk error fails the download once instead of looping.
+- yt-dlp for YouTube and other video sites: `DownloadType.YtDlp` / `YtDlpDownloadTaskInfo` (persisted in
+  `TaskInfoDB`), `YtDlpDownloaderTask` (xdm-core: runs yt-dlp per format, parses the `BLAZMA-PROGRESS`
+  template, merges video+audio with `TransmuxingMuxer`, so no ffmpeg), and in xdm-app `ytdlp/`
+  (`YtDlpTool` downloads/verifies/updates the binary in `<config>/tools`, `YtDlpFormats` builds the
+  quality list, `YtDlpSites` = video page patterns, mirrored as `VIDEO_PAGES` in the extension) and
+  `YtDlpWindow` (quality picker). `/ytdl` in `BrowserIntegration` opens it; stream pieces on those
+  sites are dropped in `VideoHelper.isStreamPieceOfVideoSite`.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
   The installers ship a jlink runtime with only the modules in `packaging/build-bundle.{sh,ps1}`

@@ -1,8 +1,11 @@
 {
     "name": "Blazma Get Browser Helper",
-    "action": {},
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Blazma Get"
+    },
     "manifest_version": 3,
-    "version": "3.3",
+    "version": "3.4",
     "description": "Download files and videos with Blazma Get.",
     "host_permissions": [
         "*://*/*"

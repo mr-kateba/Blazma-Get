@@ -146,6 +146,7 @@ object VideoHelper {
     private fun isDashUrl(url: String?): Boolean = StringUtils.containsIgnoreCase(url, ".mpd")
 
     fun processMediaMessage(msg: ExtensionMessage) {
+        if (isStreamPieceOfVideoSite(msg)) return
         val responseHeaders =
             msg.responseHeaders?.map { entry -> entry.key to entry.value.map { it.value } }?.associate { it }
         val contentType = getHeader(CONTENT_TYPE, responseHeaders) ?: return
@@ -161,6 +162,18 @@ object VideoHelper {
                 contentLength ?: -1L
             )
         }
+    }
+
+    /**
+     * YouTube (and the other sites yt-dlp handles) stream a video as many small audio and video
+     * pieces; listing each one filled the extension with useless "YouTube.mp3" entries of a few KB.
+     * Those pages get the extension's "Download this video" button (yt-dlp) instead.
+     */
+    internal fun isStreamPieceOfVideoSite(msg: ExtensionMessage): Boolean {
+        val url = msg.url ?: return false
+        val host = runCatching { URI(url).host?.lowercase() }.getOrNull() ?: ""
+        if (host.endsWith("googlevideo.com") || url.contains("/videoplayback")) return true
+        return msg.tabUrl?.let { xdm.app.ytdlp.YtDlpSites.isVideoPage(it) } == true
     }
 
     private fun processHttpVideo(msg: ExtensionMessage, type: String?, len: Long) {

@@ -1,8 +1,11 @@
 {
     "name": "Blazma Get Browser Helper",
-    "browser_action": {},
+    "browser_action": {
+        "default_popup": "app/popup.html",
+        "default_title": "Blazma Get"
+    },
     "manifest_version": 2,
-    "version": "1.4",
+    "version": "1.5",
     "description": "Download files with Blazma Get",
     "permissions": [
         "tabs",

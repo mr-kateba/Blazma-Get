@@ -32,7 +32,9 @@ object ClipboardMonitor {
         if (!AppContext.config.monitorClipboard) return
         val urls = DownloadLinks.extract(text)
         val url = urls.singleOrNull() ?: return
-        if (DownloadLinks.looksLikeDownload(url, AppContext.config.fileExtensions)) {
+        if (DownloadLinks.looksLikeDownload(url, AppContext.config.fileExtensions) ||
+            xdm.app.ytdlp.YtDlpSites.isVideoPage(url)
+        ) {
             Logger.info("Clipboard", "Download link copied: $url")
             AppContext.app.addDownloadFromUrl(url)
         }

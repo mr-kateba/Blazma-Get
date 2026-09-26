@@ -73,3 +73,9 @@ Filename: "{sys}\taskkill.exe"; Parameters: "/F /IM {#AppExe}"; Flags: runhidden
 ; The app adds this start-on-login value itself; nothing is written at install, it is only removed
 ; on uninstall so Windows does not try to start a program that is gone.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "BlazmaGet"; Flags: uninsdeletevalue dontcreatekey
+; blazma-get:// links start the app: the browser extension's "Open Blazma Get" button uses it when
+; the app is not running. A second start only brings the running window to the front.
+Root: HKCU; Subkey: "Software\Classes\blazma-get"; ValueType: string; ValueName: ""; ValueData: "URL:Blazma Get"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\blazma-get"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKCU; Subkey: "Software\Classes\blazma-get\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\{#AppExe}"",0"
+Root: HKCU; Subkey: "Software\Classes\blazma-get\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#AppExe}"" ""%1"""

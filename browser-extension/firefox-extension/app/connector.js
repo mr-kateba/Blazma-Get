@@ -123,6 +123,11 @@ class Connector {
             .catch(err => this.disconnect());
     }
 
+    /** Sends a request whose reply is not the config (e.g. /show answers plain text). */
+    postQuiet(url, data) {
+        fetch(APP_BASE_URL + url, { method: "POST", body: JSON.stringify(data) }).catch(() => { });
+    }
+
     launchApp() {
 
     }

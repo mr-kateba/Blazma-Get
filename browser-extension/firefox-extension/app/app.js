@@ -1,5 +1,29 @@
 "use strict";
 
+/**
+ * Video pages Blazma Get downloads with yt-dlp (quality picker), kept in sync with YtDlpSites.kt.
+ */
+const VIDEO_PAGES = [
+    /^https?:\/\/(www\.|m\.|music\.)?youtube\.com\/(watch\?.*v=|shorts\/|live\/|embed\/)/i,
+    /^https?:\/\/youtu\.be\/[\w-]+/i,
+    /^https?:\/\/(www\.|mobile\.)?(twitter|x)\.com\/[^/]+\/status\/\d+/i,
+    /^https?:\/\/(www\.)?instagram\.com\/(p|reel|reels|tv)\//i,
+    /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i,
+    /^https?:\/\/(www\.|m\.|web\.)?facebook\.com\/(.+\/videos\/|watch|reel\/|share\/)/i,
+    /^https?:\/\/fb\.watch\//i,
+    /^https?:\/\/(www\.)?vimeo\.com\/\d+/i,
+    /^https?:\/\/(www\.)?dailymotion\.com\/video\//i,
+    /^https?:\/\/(www\.)?twitch\.tv\/(videos\/|[^/]+\/clip\/)|^https?:\/\/clips\.twitch\.tv\//i,
+    /^https?:\/\/(www\.)?reddit\.com\/r\/[^/]+\/comments\//i,
+    /^https?:\/\/(www\.)?soundcloud\.com\/[^/]+\/[^/?#]+/i,
+    /^https?:\/\/(www\.)?bilibili\.com\/video\//i,
+];
+
+function videoPage(url) {
+    return !!url && VIDEO_PAGES.some(re => re.test(url));
+}
+
+
 class App {
 
     constructor() {
@@ -70,6 +94,9 @@ class App {
     }
 
     onTabUpdate(tabId, changeInfo, tab) {
+        if (changeInfo.url) {
+            this.updateActionIcon();
+        }
         if (!this.isMonitoringEnabled()) {
             return;
         }
@@ -107,38 +134,13 @@ class App {
 
     updateActionIcon() {
         chrome.browserAction.setIcon({ path: this.getActionIcon() });
-        let vc = "";
-        if (this.videoList && this.videoList.length > 0) {
-            let len = this.videoList.filter(vid => {
-                if (!vid.tabId) {
-                    return true;
-                }
-                if (vid.tabId == '-1') {
-                    return true;
-                }
-                return (vid.tabId == this.activeTabId);
-            }).length;
-            if (len > 0) {
-                vc = len + "";
-            }
-        }
-        chrome.browserAction.setBadgeText({ text: vc });
-        if (!this.connector.isConnected()) {
-            this.logger.log("Not connected...");
-            chrome.browserAction.setPopup({ popup: "./app/error.html" });
-            return;
-        }
-        if (!this.appEnabled) {
-            chrome.browserAction.setPopup({ popup: "./app/disabled.html" });
-            return;
-        }
-        else {
-            chrome.browserAction.setPopup({ popup: "./app/popup.html" });
-            return;
-            // if (this.videoList && this.videoList.length > 0) {
-            //     chrome.browserAction.setBadgeText({ text: this.videoList.length + "" });
-            // }
-        }
+        chrome.browserAction.setBadgeBackgroundColor({ color: "#FF6D00" });
+        this.withActiveTab(tab => {
+            let tabId = tab ? tab.id + "" : this.activeTabId;
+            let len = (this.videoList || []).filter(vid => !vid.tabId || vid.tabId == '-1' || vid.tabId == tabId).length;
+            let text = len > 0 ? len + "" : (tab && videoPage(tab.url) && this.connector.isConnected() ? "▶" : "");
+            chrome.browserAction.setBadgeText({ text: text });
+        });
     }
 
     getActionIconName(icon) {
@@ -190,19 +192,43 @@ class App {
         this.onDisconnect();
     }
 
+    withActiveTab(callback) {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => callback(tabs && tabs[0] ? tabs[0] : null));
+    }
+
     onPopupMessage(request, sender, sendResponse) {
         this.logger.log(request.type);
         if (request.type === "stat") {
-            let resp = {
-                enabled: this.isMonitoringEnabled(),
-                list: this.videoList.filter(vid => {
-                    if (!vid.tabId) {
-                        return true;
-                    }
-                    return (vid.tabId == this.activeTabId);
-                })
-            };
-            sendResponse(resp);
+            this.withActiveTab(tab => {
+                let tabId = tab ? tab.id + "" : this.activeTabId;
+                this.activeTabId = tabId;
+                sendResponse({
+                    enabled: this.isMonitoringEnabled(),
+                    connected: this.connector.isConnected(),
+                    userDisabled: this.userDisabled,
+                    list: this.videoList.filter(vid => !vid.tabId || vid.tabId == '-1' || vid.tabId == tabId),
+                    videoPage: !!tab && videoPage(tab.url),
+                    tabUrl: tab ? tab.url : null,
+                    tabTitle: tab ? tab.title : null,
+                });
+            });
+            return true;
+        }
+        else if (request.type === "ytdl") {
+            this.withActiveTab(tab => {
+                if (tab && this.isSupportedProtocol(tab.url)) {
+                    this.connector.postMessage("/ytdl", { url: tab.url, tabTitle: tab.title });
+                }
+            });
+        }
+        else if (request.type === "reload") {
+            this.withActiveTab(tab => tab && chrome.tabs.reload(tab.id));
+        }
+        else if (request.type === "show") {
+            this.connector.postQuiet("/show", {});
+        }
+        else if (request.type === "launch") {
+            chrome.tabs.create({ url: "blazma-get://open" });
         }
         else if (request.type === "cmd") {
             this.userDisabled = request.enabled === false;

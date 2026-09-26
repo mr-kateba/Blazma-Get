@@ -12,7 +12,7 @@
 
 > الإضافة لسا مو منشورة في متجر Chrome، عشان كذا تثبيتها يدوي. ما ياخذ أكثر من دقيقة، وتسويه مرة وحدة بس.
 
-**المحتويات:** [Chrome وEdge وBrave](#ar-chrome) · [فايرفوكس](#ar-firefox) · [جرّب إنها تشتغل](#ar-test) · [لو ما اشتغلت](#ar-help)
+**المحتويات:** [Chrome وEdge وBrave](#ar-chrome) · [فايرفوكس](#ar-firefox) · [جرّب إنها تشتغل](#ar-test) · [استخدام الإضافة ويوتيوب](#ar-use) · [لو ما اشتغلت](#ar-help)
 
 <a id="ar-chrome"></a>
 
@@ -82,15 +82,39 @@
 
 <p align="center"><img src="screenshots/extension/6-download-caught-ar.png" width="560" alt="Blazma Get التقط التحميل من المتصفح"></p>
 
+<a id="ar-use"></a>
+
+## استخدام الإضافة
+
+اضغط أيقونة Blazma Get جنب شريط العنوان (لو ما تشوفها: اضغط قطعة البازل 🧩 ثم الدبوس 📌 جنب Blazma Get).
+
+**يوتيوب ومواقع الفيديو** (يوتيوب، تويتر/X، إنستقرام، تيك توك، فيسبوك، فيميو وغيرها): على صفحة الفيديو يطلع **▶** على الأيقونة، وفي نافذتها زر **حمّل هذا الفيديو**. يفتح لك Blazma Get نافذة تختار فيها الجودة (مثل 1080p) أو **صوت فقط**.
+
+<p align="center">
+  <img src="screenshots/extension/7-popup-video-page-ar.png" width="330" alt="زر حمّل هذا الفيديو">
+  <img src="screenshots/extension/9-quality-picker-ar.png" width="420" alt="اختيار الجودة">
+</p>
+
+أول مرة تحمّل فيها من يوتيوب، البرنامج ينزّل أداة [yt-dlp](https://github.com/yt-dlp/yt-dlp) المجانية (حوالي 18 ميجا) ويتأكد من سلامتها، ويحدّثها لحاله كل يوم عشان تتابع تغييرات يوتيوب. الفيديو والصوت يندمجون في ملف MP4 واحد داخل البرنامج نفسه.
+
+**باقي المواقع:** الفيديوهات اللي تشتغل في الصفحة تطلع في قائمة **الملفات اللي لقيناها**، والرقم على الأيقونة يقول كم وحدة. القائمة تتحدّث لحالها وهي مفتوحة. لو ما طلع شي: شغّل الفيديو أو اضغط **تحديث الصفحة**.
+
+<p align="center"><img src="screenshots/extension/8-popup-found-ar.png" width="330" alt="الملفات اللي لقيناها"></p>
+
+**الزر اليمين:** على أي رابط اختر **تحميل بـ Blazma Get**. ولو الرابط لصفحة فيديو (مثل رابط يوتيوب) تطلع لك نافذة الجودة.
+
+**التقاط التحميلات:** المفتاح تحت يوقف أو يشغّل التقاط تحميلات المتصفح مؤقتًا.
+
 <a id="ar-help"></a>
 
 ## لو ما اشتغلت
 
 | المشكلة | الحل |
 |---|---|
-| المتصفح يحمّل الملف بنفسه | تأكد إن Blazma Get **شغّال**. الإضافة ترسل التحميل للبرنامج، ولو البرنامج مسكّر يحمّله المتصفح عادي. لو ضغطت أيقونة الإضافة وطلع لك *Unable to connect with Blazma Get* فمعناه البرنامج مو شغّال |
+| المتصفح يحمّل الملف بنفسه | تأكد إن Blazma Get **شغّال**. الإضافة ترسل التحميل للبرنامج، ولو البرنامج مسكّر يحمّله المتصفح عادي. لو ضغطت أيقونة الإضافة وطلع لك **Blazma Get مو شغّال** اضغط **افتح Blazma Get** |
 | نوع ملف معيّن ما ينلقط | من **الإعدادات ← المتصفح ← أنواع الملفات** أضف امتداده (مثل `APK`) |
-| الإضافة مطفية | في صفحة الإضافات تأكد إن مفتاح Blazma Get Browser Helper شغّال. واضغط على أيقونة الإضافة في المتصفح وتأكد إن **Browser monitoring** مفعّل |
+| الإضافة مطفية | في صفحة الإضافات تأكد إن مفتاح Blazma Get Browser Helper شغّال. واضغط على أيقونة الإضافة وتأكد إن **التقاط التحميلات** مفعّل |
+| يوتيوب: "ما قدرنا نقرأ فيديو" | تأكد من النت واضغط **حاول مرة ثانية**. لو استمر، يوتيوب غيّر شي والأداة تتحدّث لحالها خلال يوم |
 | الإضافة اختفت أو طلع خطأ | غالبًا المجلد انحذف أو انتقل. من Blazma Get اضغط **افتح مجلد الإضافة** مرة ثانية، واحذف الإضافة من المتصفح وحمّلها من جديد |
 | حدّثت Blazma Get | اضغط **افتح مجلد الإضافة** مرة وحدة (يحدّث ملفات الإضافة)، وبعدين اضغط زر التحديث ↻ على الإضافة في صفحة الإضافات |
 | نزّلت `BlazmaGet-Chrome-Extension.zip` من صفحة الإصدار | فك الضغط في مجلد ثابت ما راح تحذفه، وبعدين كمّل من الخطوة 3 واختر هذا المجلد |
@@ -107,7 +131,7 @@ The extension sends every file you download in your browser to **Blazma Get** in
 
 > The extension is not on the Chrome Web Store yet, so it is installed by hand. It takes about a minute and you only do it once.
 
-**Contents:** [Chrome, Edge, Brave](#en-chrome) · [Firefox](#en-firefox) · [Check that it works](#en-test) · [Troubleshooting](#en-help)
+**Contents:** [Chrome, Edge, Brave](#en-chrome) · [Firefox](#en-firefox) · [Check that it works](#en-test) · [Using it, YouTube](#en-use) · [Troubleshooting](#en-help)
 
 <a id="en-chrome"></a>
 
@@ -177,15 +201,34 @@ Keep Blazma Get running (minimized to the tray is fine) and download any file in
 
 <p align="center"><img src="screenshots/extension/6-download-caught-en.png" width="560" alt="Blazma Get caught the browser download"></p>
 
+<a id="en-use"></a>
+
+## Using the extension
+
+Click the Blazma Get icon next to the address bar (if it is hidden: click the puzzle piece 🧩, then the pin 📌 next to Blazma Get).
+
+**YouTube and video sites** (YouTube, X/Twitter, Instagram, TikTok, Facebook, Vimeo and more): on a video page the icon shows **▶** and its window has a **Download this video** button. Blazma Get opens a window where you pick the quality (e.g. 1080p) or **audio only**.
+
+The first time, Blazma Get downloads the free [yt-dlp](https://github.com/yt-dlp/yt-dlp) tool (about 18 MB), checks it against its published checksum, and updates it daily to keep up with YouTube. Video and audio are merged into one MP4 by Blazma Get itself, no ffmpeg needed.
+
+**Other sites:** videos a page plays are listed under **Found on this page**, with their number on the icon. The list updates live while the window is open; if nothing shows, play the video or click **Reload page**.
+
+<p align="center"><img src="screenshots/extension/8-popup-found-en.png" width="330" alt="Found on this page"></p>
+
+**Right-click** any link and choose **Download with Blazma Get**; a link to a video page opens the quality picker.
+
+**Catch downloads** at the bottom pauses or resumes taking over the browser's downloads.
+
 <a id="en-help"></a>
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| The browser downloads the file itself | Make sure Blazma Get is **running**. The extension hands downloads to the app; when the app is closed, the browser downloads as usual. If clicking the extension's icon shows *Unable to connect with Blazma Get*, the app is not running |
+| The browser downloads the file itself | Make sure Blazma Get is **running**. The extension hands downloads to the app; when the app is closed, the browser downloads as usual. If the extension's window says **Blazma Get is not running**, click **Open Blazma Get** |
 | A file type is not caught | Add its extension (e.g. `APK`) in **Settings > Browser > File types** |
-| The extension is off | On the extensions page, check that Blazma Get Browser Helper is switched on. Click the extension's icon in the toolbar and make sure **Browser monitoring** is ticked |
+| The extension is off | On the extensions page, check that Blazma Get Browser Helper is switched on. Open the extension's window and make sure **Catch downloads** is on |
+| YouTube: "Could not read a video" | Check the connection and click **Try again**. If it keeps failing, YouTube changed something; the tool updates itself within a day |
 | The extension disappeared or shows an error | The folder was probably deleted or moved. Click **Open extension folder** in Blazma Get again, remove the extension from the browser and load it again |
 | You updated Blazma Get | Click **Open extension folder** once (it refreshes the extension files), then click the reload button ↻ on the extension's card |
 | You downloaded `BlazmaGet-Chrome-Extension.zip` from the release page | Unzip it into a folder you will keep, then continue from step 3 and choose that folder |

@@ -222,7 +222,9 @@ class MainListView {
 
     private fun prepareMenu(contextMenu: JPopupMenu, entry: DbRecord) {
 //        mSaveAs.isVisible = entry.status != RecordStatus.FINISHED
-        mRefresh.isVisible = entry.status == RecordStatus.PAUSED && !AppContext.refreshLinkInProgress.get()
+        // yt-dlp downloads fetch fresh links on every run: nothing to refresh by hand.
+        mRefresh.isVisible = entry.status == RecordStatus.PAUSED && !AppContext.refreshLinkInProgress.get() &&
+            entry.downloadType != xdm.core.downloaders.DownloadType.YtDlp
         mSchedule.isVisible = entry.status == RecordStatus.PAUSED
         mProgress.isVisible = entry.status == RecordStatus.DOWNLOADING
 //        mCopyFile.isVisible = entry.status == RecordStatus.FINISHED

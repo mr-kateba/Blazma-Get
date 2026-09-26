@@ -1,50 +1,69 @@
+<!doctype html>
 <html>
 
 <head>
-  <script src="popup.js"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+    <script src="popup.js"></script>
 </head>
 
-<body style="min-width: 400px; font-family:helvetica,arial,courier;">
-  <div style="font-size: 18px; border-bottom: 1px solid lightgray; padding: 15px; ">
-    Blazma Get Browser Helper
-  </div>
-  <div>
-    <div id="content">
-      <div id="list" style="min-height: 200px; max-height: 400px; overflow: hidden; overflow-y: auto;">
+<body>
+    <header>
+        <img src="icon48.png" alt="" class="logo">
+        <span class="brand">Blazma Get</span>
+        <span id="status" class="status"></span>
+    </header>
 
-        <table id="table"
-          style="overflow-y: auto;background: white; margin: 0px; padding: 0px;font-family:helvetica,arial,courier;">
-        </table>
+    <!-- Blazma Get is not running -->
+    <section id="offline" class="card offline" hidden>
+        <div class="offline-title" data-t="offlineTitle"></div>
+        <div class="muted" data-t="offlineHint"></div>
+        <button id="launch" class="primary" data-t="launch"></button>
+    </section>
 
-      </div>
-      <div style="padding: 5px; display: flex;">
-        <button id="format" style="flex: 1;" class="flat-button">More formats</button>
-        <div style="padding: 5px;">
-          <div style="width: 1px; background: rgb(230,230,230); height: 20px;">
+    <div id="online" hidden>
+        <!-- A YouTube (or other supported site) video page -->
+        <section id="page" class="card page" hidden>
+            <div class="page-kicker" data-t="thisVideo"></div>
+            <div id="pageTitle" class="page-title"></div>
+            <button id="downloadPage" class="primary big">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 10h5l-6 6-6-6h5V3h2v7zM4 19h16v-7h2v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-8h2v7z"/></svg>
+                <span data-t="downloadVideo"></span>
+            </button>
+            <div class="muted small" data-t="qualityHint"></div>
+        </section>
 
-          </div>
+        <div class="section-title">
+            <span data-t="found"></span>
+            <span id="count" class="count"></span>
         </div>
-        <button id="clear" style="flex: 1;" class="flat-button">Clear items</button>
-      </div>
-    </div>
-  </div>
-  <div
-    style="font-size: 14px; padding-top: 5px; background-color: rgb(240,240,240);border-top: 1px solid rgb(200,200,200);">
-    <div>
-      <div
-        style="display: flex; justify-content: space-between; padding: 20px; padding-top: 10px; padding-bottom: 10px;">
-        <!--span>Browser monitoring</span-->
+        <ul id="list" class="list"></ul>
+        <div id="empty" class="empty" hidden>
+            <div data-t="emptyTitle"></div>
+            <div class="muted small" data-t="emptyHint"></div>
+        </div>
 
-        <label class="container">Browser monitoring
-          <input type="checkbox" id="chk">
-          <span class="checkmark"></span>
-        </label>
-        <!-- <button class="primary-button">Connect with Blazma Get</button> -->
-        <!--input type="checkbox" id="chk" /-->
-      </div>
+        <div class="actions">
+            <button id="reload" class="key">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.46 5.46A8.96 8.96 0 0 1 12 3c4.97 0 9 4.03 9 9h-2a7 7 0 0 0-11.95-4.95L9 9H3V3l2.46 2.46zM18.54 18.54A8.96 8.96 0 0 1 12 21c-4.97 0-9-4.03-9-9h2a7 7 0 0 0 11.95 4.95L15 15h6v6l-2.46-2.46z"/></svg>
+                <span data-t="reload"></span>
+            </button>
+            <button id="clear" class="key">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 6h5v2h-2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8H2V6h5V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3zm1 2H6v12h12V8zM9 4v2h6V4H9z"/></svg>
+                <span data-t="clear"></span>
+            </button>
+        </div>
     </div>
-  </div>
+
+    <footer>
+        <label class="switch">
+            <input type="checkbox" id="monitor">
+            <span class="slider"></span>
+            <span data-t="monitor"></span>
+        </label>
+        <button id="openApp" class="link" data-t="openApp"></button>
+    </footer>
+    <div id="toast" class="toast" hidden></div>
 </body>
 
 </html>

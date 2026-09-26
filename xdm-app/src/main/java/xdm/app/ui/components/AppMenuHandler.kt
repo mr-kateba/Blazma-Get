@@ -368,6 +368,7 @@ object AppMenuHandler {
             DownloadType.Http -> AppContext.taskInfoDB.getHttpTask(record.id)?.url
             DownloadType.Hls -> AppContext.taskInfoDB.getHlsTask(record.id)?.url
             DownloadType.Dash -> AppContext.taskInfoDB.getDashTask(record.id)?.url
+            DownloadType.YtDlp -> AppContext.taskInfoDB.getYtDlpTask(record.id)?.pageUrl
             else -> null
         }
         if (url != null) {

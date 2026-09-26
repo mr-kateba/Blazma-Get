@@ -45,6 +45,9 @@ interface IAppInstance {
     /** Opens the New download dialog for [url] (clipboard monitor, drag and drop, Ctrl+V). */
     fun addDownloadFromUrl(url: String)
 
+    /** Opens the quality picker for a video page (YouTube and other sites yt-dlp supports). */
+    fun showYtDlpWindow(url: String, title: String?) {}
+
     fun addVideoDownload(vid: Long, fileName: String, fileSize: Long?, fileType: String?)
 
     fun showProgressWindow(id: Long, fileName: String)
@@ -166,7 +169,16 @@ class AppInstance : IAppInstance {
     }
 
     override fun addDownloadFromUrl(url: String) {
+        // A video page (YouTube...) is not a file: pick a quality with yt-dlp instead.
+        if (xdm.app.ytdlp.YtDlpSites.isVideoPage(url)) {
+            showYtDlpWindow(url, null)
+            return
+        }
         runOnUIThread { NewDownloadWindow().showWindow(null, url) }
+    }
+
+    override fun showYtDlpWindow(url: String, title: String?) {
+        runOnUIThread { xdm.app.ui.screens.YtDlpWindow(url, title).isVisible = true }
     }
 
     private fun showNewDownloadWindowInternal(downloadInfo: HttpDownloadTaskInfo?) {

@@ -42,7 +42,7 @@ object BrowserIntegration {
         "extension://",
         "safari-web-extension://"
     )
-    private val stateChangingPaths = setOf("/download", "/media", "/vid", "/clear", "/tab-update", "/poll", SHOW_PATH)
+    private val stateChangingPaths = setOf("/download", "/media", "/vid", "/ytdl", "/clear", "/tab-update", "/poll", SHOW_PATH)
 
     /**
      * Sent by a second launch of the app: brings this instance's window to the front. The reply
@@ -101,6 +101,7 @@ object BrowserIntegration {
             "/download" -> onDownloadMessage(context)
             "/media" -> onMediaMessage(context)
             "/vid" -> onVideoDownloadMessage(context)
+            "/ytdl" -> onYtDlpMessage(context)
             "/clear" -> AppContext.videoTracker.clear()
         }
         onSyncMessage(context)
@@ -171,6 +172,18 @@ object BrowserIntegration {
         }
     }
 
+    /** The extension's "Download this video" button: the page goes to yt-dlp's quality picker. */
+    private fun onYtDlpMessage(context: RequestContext) {
+        context.requestBody?.let { content ->
+            val extMsg = synchronized(json) {
+                json.decodeFromString<ExtensionMessage>(content.toString(StandardCharsets.UTF_8))
+            }
+            extMsg.url?.takeIf { it.startsWith("http://") || it.startsWith("https://") }?.let {
+                AppContext.app.showYtDlpWindow(it, extMsg.tabTitle)
+            }
+        }
+    }
+
     private fun onMediaMessage(context: RequestContext) {
         Logger.info("Received media message..")
         context.requestBody?.let { content ->
@@ -195,8 +208,13 @@ object BrowserIntegration {
                 extMsg = json.decodeFromString<ExtensionMessage>(str)
             }
             removeBlockedHeaders(extMsg)
-            extMsg.url?.let {
-                AppContext.app.addDownload(toHttpSource(extMsg))
+            extMsg.url?.let { url ->
+                // "Download with Blazma Get" on a link to a video page: pick a quality with yt-dlp.
+                if (xdm.app.ytdlp.YtDlpSites.isVideoPage(url)) {
+                    AppContext.app.showYtDlpWindow(url, null)
+                } else {
+                    AppContext.app.addDownload(toHttpSource(extMsg))
+                }
             }
         }
     }

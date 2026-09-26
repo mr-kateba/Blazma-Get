@@ -222,6 +222,61 @@ class TaskInfoDB(private val configDir: String) {
         }.onFailure { Logger.error("XDM", "Error saving task info ${task.id}", it) }
     }
 
+    fun getYtDlpTask(id: Long): YtDlpDownloadTaskInfo? {
+        AtomicIO.readTransacted("task-$id.info", configDir) { r ->
+            val taskId = r.readLong()
+            val pageUrl = r.readLongString()
+            val fileName = r.readLongString()
+            val respectFileName = r.readBoolean()
+            val autoCategorize = r.readBoolean()
+            val defaultDownloadFolder = r.readLongString()
+            val maxPiece = r.readInt()
+            val tempDir = r.readLongString()
+            val formatIds = List(r.readInt()) { r.readLongString() }
+            val outputExt = r.readLongString()
+            val expectedSize = if (r.readBoolean()) r.readLong() else null
+            val req = readRequestFields(r)
+            return YtDlpDownloadTaskInfo(
+                id = taskId,
+                fileName = fileName,
+                tempDir = tempDir,
+                respectFileName = respectFileName,
+                cookie = req.cookie,
+                headers = req.headers,
+                origin = req.origin,
+                autoCategorize = autoCategorize,
+                defaultDownloadFolder = defaultDownloadFolder,
+                userSelectedDownloadFolder = req.userSelectedDownloadFolder,
+                maxPiece = maxPiece,
+                authInfo = null,
+                pageUrl = pageUrl,
+                formatIds = formatIds,
+                outputExt = outputExt,
+                expectedSize = expectedSize,
+            )
+        }
+        return null
+    }
+
+    fun saveYtDlpTask(task: YtDlpDownloadTaskInfo) {
+        AtomicIO.writeTransacted("task-${task.id}.info", configDir, ownerOnly = true) { w ->
+            w.writeLong(task.id)
+            w.writeLongString(task.pageUrl)
+            w.writeLongString(task.fileName)
+            w.writeBoolean(task.respectFileName)
+            w.writeBoolean(task.autoCategorize)
+            w.writeLongString(task.defaultDownloadFolder)
+            w.writeInt(task.maxPiece)
+            w.writeLongString(task.tempDir)
+            w.writeInt(task.formatIds.size)
+            task.formatIds.forEach { w.writeLongString(it) }
+            w.writeLongString(task.outputExt)
+            w.writeBoolean(task.expectedSize != null)
+            task.expectedSize?.let { w.writeLong(it) }
+            writeRequestFields(w, task.cookie, task.headers, task.origin, task.userSelectedDownloadFolder)
+        }.onFailure { Logger.error("XDM", "Error saving task info ${task.id}", it) }
+    }
+
     fun deleteRecord(id: Long) {
         File(configDir, "task-$id.info").delete()
         File(configDir, "task-$id.info.bak1").delete()

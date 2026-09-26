@@ -38,6 +38,12 @@ fun getFileFolder(ent: DbRecord): Pair<String?, String?>? {
             fileName = md.fileName
         }
 
+        DownloadType.YtDlp -> {
+            val md = taskInfoDB.getYtDlpTask(ent.id) ?: return null
+            folder = md.userSelectedDownloadFolder ?: md.defaultDownloadFolder
+            fileName = md.fileName
+        }
+
         DownloadType.Torrent -> TODO()
     }
 

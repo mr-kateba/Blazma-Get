@@ -3,6 +3,29 @@ import Logger from './logger.js';
 import RequestWatcher from './request-watcher.js';
 import Connector from './connector.js';
 
+/**
+ * Video pages Blazma Get downloads with yt-dlp (quality picker), kept in sync with YtDlpSites.kt.
+ */
+const VIDEO_PAGES = [
+    /^https?:\/\/(www\.|m\.|music\.)?youtube\.com\/(watch\?.*v=|shorts\/|live\/|embed\/)/i,
+    /^https?:\/\/youtu\.be\/[\w-]+/i,
+    /^https?:\/\/(www\.|mobile\.)?(twitter|x)\.com\/[^/]+\/status\/\d+/i,
+    /^https?:\/\/(www\.)?instagram\.com\/(p|reel|reels|tv)\//i,
+    /^https?:\/\/(www\.|vm\.|vt\.)?tiktok\.com\//i,
+    /^https?:\/\/(www\.|m\.|web\.)?facebook\.com\/(.+\/videos\/|watch|reel\/|share\/)/i,
+    /^https?:\/\/fb\.watch\//i,
+    /^https?:\/\/(www\.)?vimeo\.com\/\d+/i,
+    /^https?:\/\/(www\.)?dailymotion\.com\/video\//i,
+    /^https?:\/\/(www\.)?twitch\.tv\/(videos\/|[^/]+\/clip\/)|^https?:\/\/clips\.twitch\.tv\//i,
+    /^https?:\/\/(www\.)?reddit\.com\/r\/[^/]+\/comments\//i,
+    /^https?:\/\/(www\.)?soundcloud\.com\/[^/]+\/[^/?#]+/i,
+    /^https?:\/\/(www\.)?bilibili\.com\/video\//i,
+];
+
+export function videoPage(url) {
+    return !!url && VIDEO_PAGES.some(re => re.test(url));
+}
+
 export default class App {
     constructor() {
         this.logger = new Logger();
@@ -99,6 +122,10 @@ export default class App {
     }
 
     onTabUpdate(tabId, changeInfo, tab) {
+        // YouTube changes video without reloading: refresh the badge when the address changes.
+        if (changeInfo.url) {
+            this.updateActionIcon();
+        }
         if (!this.isMonitoringEnabled()) {
             return;
         }
@@ -178,28 +205,13 @@ export default class App {
 
     updateActionIcon() {
         chrome.action.setIcon({ path: this.getActionIcon() });
-        let vc = "";
-        let len = this.videosForTab(this.activeTabId).length;
-        if (len > 0) {
-            vc = len + "";
-        }
-        chrome.action.setBadgeText({ text: vc });
-        if (!this.connector.isConnected()) {
-            this.logger.log("Not connected...");
-            chrome.action.setPopup({ popup: "./error.html" });
-            return;
-        }
-        if (!this.appEnabled) {
-            chrome.action.setPopup({ popup: "./disabled.html" });
-            return;
-        }
-        else {
-            chrome.action.setPopup({ popup: "./popup.html" });
-            return;
-            // if (this.videoList && this.videoList.length > 0) {
-            //     chrome.action.setBadgeText({ text: this.videoList.length + "" });
-            // }
-        }
+        chrome.action.setBadgeBackgroundColor({ color: "#FF6D00" });
+        this.withActiveTab(tab => {
+            let len = this.videosForTab(tab ? tab.id + "" : this.activeTabId).length;
+            // A count of the videos found, or a play mark on a page the quality picker handles.
+            let text = len > 0 ? len + "" : (tab && videoPage(tab.url) && this.connector.isConnected() ? "▶" : "");
+            chrome.action.setBadgeText({ text: text });
+        });
     }
 
     getActionIconName(icon) {
@@ -252,20 +264,49 @@ export default class App {
         this.onDisconnect();
     }
 
+    /** The active tab of the focused window, or null. */
+    withActiveTab(callback) {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => callback(tabs && tabs[0] ? tabs[0] : null));
+    }
+
     onPopupMessage(request, sender, sendResponse) {
         this.logger.log(request.type);
         if (request.type === "stat") {
             // Resolve the active tab fresh: the MV3 service worker can be torn
             // down, resetting this.activeTabId, so don't rely on it here.
-            chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-                let tabId = (tabs && tabs[0]) ? tabs[0].id + "" : this.activeTabId;
+            this.withActiveTab(tab => {
+                let tabId = tab ? tab.id + "" : this.activeTabId;
                 this.activeTabId = tabId;
                 sendResponse({
                     enabled: this.isMonitoringEnabled(),
-                    list: this.videosForTab(tabId)
+                    connected: this.connector.isConnected(),
+                    userDisabled: this.userDisabled,
+                    list: this.videosForTab(tabId),
+                    videoPage: !!tab && videoPage(tab.url),
+                    tabUrl: tab ? tab.url : null,
+                    tabTitle: tab ? tab.title : null,
                 });
             });
             return true; // keep the message channel open for the async response
+        }
+        else if (request.type === "ytdl") {
+            // "Download this video": the app looks the page up with yt-dlp and shows the qualities.
+            this.withActiveTab(tab => {
+                if (tab && this.isSupportedProtocol(tab.url)) {
+                    this.connector.postMessage("/ytdl", { url: tab.url, tabTitle: tab.title });
+                }
+            });
+        }
+        else if (request.type === "reload") {
+            // Videos are found from the page's own requests; a reload makes it request them again.
+            this.withActiveTab(tab => tab && chrome.tabs.reload(tab.id));
+        }
+        else if (request.type === "show") {
+            this.connector.postQuiet("/show", {});
+        }
+        else if (request.type === "launch") {
+            // Registered by the Windows installer; the app shows its window when started this way.
+            chrome.tabs.create({ url: "blazma-get://open" });
         }
         else if (request.type === "cmd") {
             this.userDisabled = request.enabled === false;

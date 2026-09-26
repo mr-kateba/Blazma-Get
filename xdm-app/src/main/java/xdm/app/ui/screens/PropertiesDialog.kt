@@ -31,6 +31,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
             DownloadType.Http -> AppContext.taskInfoDB.getHttpTask(ent.id)?.url
             DownloadType.Hls -> AppContext.taskInfoDB.getHlsTask(ent.id)?.url
             DownloadType.Dash -> AppContext.taskInfoDB.getDashTask(ent.id)?.url
+            DownloadType.YtDlp -> AppContext.taskInfoDB.getYtDlpTask(ent.id)?.pageUrl
             else -> null
         } ?: ""
 
@@ -39,6 +40,7 @@ class PropertiesDialog(owner: Window?, ent: DbRecord) : JDialog(owner) {
             DownloadType.Hls -> "HLS"
             DownloadType.Dash -> "DASH"
             DownloadType.Torrent -> "Torrent"
+            DownloadType.YtDlp -> "yt-dlp"
         }
 
         val sizeText = if (ent.size > 0) UiLocale.ltr(FormatHelper.formatSize(ent.size.toDouble())) else text("PROP_UNKNOWN")

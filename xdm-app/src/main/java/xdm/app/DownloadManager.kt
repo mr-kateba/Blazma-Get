@@ -11,6 +11,8 @@ import xdm.core.downloaders.web.saveState
 import xdm.core.downloaders.web.streaming.downloader.dash.DashDownloaderTask
 import xdm.core.downloaders.web.streaming.downloader.hls.HlsDownloaderTask
 import xdm.core.downloaders.web.streaming.downloader.hls.HlsKeyStore
+import xdm.core.downloaders.ytdlp.YtDlpDownloaderTask
+import xdm.app.ytdlp.YtDlpTool
 import xdm.core.media.muxer.impl.TransmuxingMuxer
 import xdm.core.network.http.impl.HttpClientImpl
 import xdm.core.util.AtomicIO
@@ -34,6 +36,7 @@ interface IDownloadManager {
     fun addVideoDownload(videoId: Long, fileName: String, folder: String?, autoSelectFolder: Boolean)
     fun startHlsDownload(task: HlsDownloadTaskInfo)
     fun startDashDownload(task: DashDownloadTaskInfo)
+    fun startYtDlpDownload(task: YtDlpDownloadTaskInfo)
     fun updateDownloadInfo(id: Long, task: HttpDownloadTaskInfo)
     fun getOriginPage(id: Long): String?
 }
@@ -105,6 +108,7 @@ class DownloadManager(
 
                             DownloadType.Hls -> {}
                             DownloadType.Dash -> {}
+                            DownloadType.YtDlp -> data.fileSize?.takeIf { it > 0 }?.let { e.size = it }
                             DownloadType.Torrent -> TODO()
                         }
                         appDB.saveActiveRecords()
@@ -374,6 +378,15 @@ class DownloadManager(
                     }
                 }
 
+                DownloadType.YtDlp -> taskInfoDB.getYtDlpTask(id)?.let { t ->
+                    return renameFile(id, t.fileName, outputFolder(t.fileName, t.defaultDownloadFolder, t.autoCategorize), tmpFilePath) { finalName, finalFolder ->
+                        t.fileName = finalName
+                        t.defaultDownloadFolder = finalFolder
+                        t.autoCategorize = false
+                        taskInfoDB.saveYtDlpTask(t)
+                    }
+                }
+
                 DownloadType.Torrent -> {}
             }
 
@@ -398,6 +411,7 @@ class DownloadManager(
         val task: StreamingDownloadTaskInfo = when (downloadType) {
             DownloadType.Hls -> taskInfoDB.getHlsTask(id)
             DownloadType.Dash -> taskInfoDB.getDashTask(id)
+            DownloadType.YtDlp -> taskInfoDB.getYtDlpTask(id)
             else -> null
         } ?: return null
         val folder = outputFolder(task.fileName, task.defaultDownloadFolder, task.autoCategorize)
@@ -542,6 +556,13 @@ class DownloadManager(
             DashDownloaderTask(
                 taskInfo = it, http = newHttpClient(), muxer = TransmuxingMuxer(AppContext.configDir),
                 host = host, configDir = AppContext.configDir, config = AppContext.config
+            )
+        }
+
+        DownloadType.YtDlp -> taskInfoDB.getYtDlpTask(id)?.let {
+            YtDlpDownloaderTask(
+                task = it, host = host, toolPath = { YtDlpTool.ensure() },
+                muxer = TransmuxingMuxer(AppContext.configDir), config = AppContext.config
             )
         }
 
@@ -839,9 +860,34 @@ class DownloadManager(
         enqueue(task.id, resume = false)
     }
 
+    override fun startYtDlpDownload(task: YtDlpDownloadTaskInfo) {
+        val id = uniqueDownloadId(task.id)
+        val t = task.copy(id = id, tempDir = AppContext.config.tempFolder + File.separator + id)
+        taskInfoDB.saveYtDlpTask(t)
+        appDB.addActive(
+            DbRecord(
+                id = t.id,
+                size = t.expectedSize ?: 0,
+                downloaded = 0,
+                progress = 0,
+                date = System.currentTimeMillis(),
+                fileName = t.fileName,
+                eta = 0,
+                speed = 0.0f,
+                status = RecordStatus.READY,
+                selected = false,
+                downloadType = DownloadType.YtDlp
+            )
+        )
+        appDB.saveActiveRecords()
+        AppContext.app.addDownloadInView(t.id)
+        enqueue(t.id, resume = false)
+    }
+
     /** The address a download fetches from, whatever its type. */
     private fun downloadUrl(id: Long): String? =
-        taskInfoDB.getHttpTask(id)?.url ?: taskInfoDB.getHlsTask(id)?.url ?: taskInfoDB.getDashTask(id)?.url
+        if (appDB.getById(id)?.downloadType == DownloadType.YtDlp) taskInfoDB.getYtDlpTask(id)?.pageUrl
+        else taskInfoDB.getHttpTask(id)?.url ?: taskInfoDB.getHlsTask(id)?.url ?: taskInfoDB.getDashTask(id)?.url
 
     override fun getOriginPage(id: Long): String? {
         taskInfoDB.getHttpTask(id)?.let {

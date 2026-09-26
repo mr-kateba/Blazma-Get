@@ -5,7 +5,10 @@ import xdm.core.downloaders.web.streaming.manifest.dash.DashSegment
 import xdm.core.network.http.HeaderMap
 
 enum class DownloadType {
-    Http, Hls, Dash, Torrent
+    Http, Hls, Dash, Torrent,
+
+    /** A page (YouTube and 1000+ other sites) downloaded by the yt-dlp tool, see [YtDlpDownloadTaskInfo]. */
+    YtDlp,
 }
 
 enum class DownloadError {
@@ -122,6 +125,43 @@ data class DashDownloadTaskInfo(
     var url: String,
     val audioMime: String,
     val videoMime: String,
+) : StreamingDownloadTaskInfo(
+    id,
+    fileName,
+    tempDir,
+    respectFileName,
+    cookie,
+    headers,
+    origin,
+    autoCategorize,
+    defaultDownloadFolder,
+    userSelectedDownloadFolder,
+    maxPiece,
+    authInfo
+)
+
+/**
+ * A video page downloaded with yt-dlp: [formatIds] are yt-dlp format ids, one (a complete file, or
+ * audio only) or two (video + audio, merged into MP4 by the transmuxer, so no ffmpeg is needed).
+ * [origin] is the page, [outputExt] the final extension without the dot.
+ */
+data class YtDlpDownloadTaskInfo(
+    override val id: Long,
+    override var fileName: String,
+    override var tempDir: String,
+    override var respectFileName: Boolean,
+    override var cookie: String?,
+    override var headers: HeaderMap?,
+    override var origin: String?,
+    override var autoCategorize: Boolean,
+    override var defaultDownloadFolder: String,
+    override var userSelectedDownloadFolder: String?,
+    override var maxPiece: Int,
+    override var authInfo: AuthInfo?,
+    var pageUrl: String,
+    var formatIds: List<String>,
+    var outputExt: String,
+    var expectedSize: Long?,
 ) : StreamingDownloadTaskInfo(
     id,
     fileName,
