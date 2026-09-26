@@ -99,6 +99,8 @@ mvn test -DskipTests=false                 # الاختبارات
 - الاتجاه من اليمين لليسار والخط: `xdm-app/src/main/java/xdm/app/UiLocale.kt`
 - التكملة التلقائية لما يرجع النت: `xdm-app/src/main/java/xdm/app/AutoResume.kt`
 
+📄 تقرير المشروع الكامل (وش انسوى، وش انفحص، ووش باقي): [docs/REPORT.md](docs/REPORT.md)
+
 ### ❤️ شكر وتقدير
 
 Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.com/subhra74/xdm) للمطوّر **Subhra Das Gupta**، ومنشور بنفس الترخيص [GPL-2.0](LICENSE). الكود مفتوح للجميع، وأي أحد يقدر يساهم فيه.

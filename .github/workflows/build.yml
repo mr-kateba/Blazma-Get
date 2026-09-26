@@ -132,10 +132,19 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
+
+      # Release notes come from docs/release-notes/<tag>.md when that file exists.
+      - name: Release notes
+        run: |
+          notes="docs/release-notes/${GITHUB_REF_NAME}.md"
+          [ -f "$notes" ] || notes=""
+          echo "NOTES_FILE=$notes" >> "$GITHUB_ENV"
 
       # The jar artifact keeps its xdm-app/target/ path (it was uploaded with the extension zips).
       - name: Name the jar
@@ -148,6 +157,7 @@ jobs:
         with:
           name: Blazma Get ${{ github.ref_name }}
           generate_release_notes: true
+          body_path: ${{ env.NOTES_FILE }}
           body: |
             ## تحميل / Download
 
