@@ -109,6 +109,8 @@ mvn test -DskipTests=false                 # الاختبارات
 
 ### ❤️ شكر وتقدير
 
+تطوير Blazma Get: **kateba** ([@mr-kateba](https://github.com/mr-kateba)).
+
 Blazma Get مبني على [**Xtreme Download Manager (XDM)**](https://github.com/subhra74/xdm) للمطوّر **Subhra Das Gupta**، ومنشور بنفس الترخيص [GPL-2.0](LICENSE). الكود مفتوح للجميع، وأي أحد يقدر يساهم فيه.
 
 </div>
@@ -181,6 +183,7 @@ Every push is built and tested by [GitHub Actions](.github/workflows/build.yml);
 
 ### Credits and license
 
+- Blazma Get by **kateba** ([@mr-kateba](https://github.com/mr-kateba))
 - Based on [Xtreme Download Manager](https://github.com/subhra74/xdm) by Subhra Das Gupta
 - Licensed under the [GNU General Public License v2.0](LICENSE), like XDM
 - Arabic UI font: [IBM Plex Sans Arabic](https://github.com/IBM/plex) (SIL Open Font License)

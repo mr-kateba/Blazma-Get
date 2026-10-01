@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Authorship
+
+ممنوع إضافة أي نسب للذكاء الاصطناعي أو سطور Co-Authored-By أو عبارات Generated with في الكوميتات أو طلبات الدمج أو الكود أو التوثيق. المؤلف الوحيد هو kateba (mr-kateba).
+
+Upstream copyright and license notices (XDM by Subhra Das Gupta, GPL-2.0, and the bundled
+third-party licenses) stay exactly as they are.
+
 ## Blazma Get
 
 This repository is **Blazma Get**, a fork of XDM's Kotlin `dev` branch (GPL-2.0) with an Arabic,
