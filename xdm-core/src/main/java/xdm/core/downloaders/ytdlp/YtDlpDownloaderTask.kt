@@ -22,6 +22,11 @@ import java.util.concurrent.atomic.AtomicBoolean
  * (yt-dlp resumes its `.part` files, so pause and resume work); two formats (video + audio) are
  * then merged into one MP4 by the in-house transmuxer, so ffmpeg is never needed.
  *
+ * Looking a page up is the slow part (seconds on YouTube), so it is done once: the quality picker
+ * leaves its lookup in [INFO_JSON] in the temp folder, or the first run writes it, and every run
+ * then starts from it (`--load-info-json`) instead of reading the page again. Its stream addresses
+ * expire after some hours; a run that fails from it is retried once from the page itself.
+ *
  * [toolPath] returns the yt-dlp executable, downloading it first if needed; it may throw.
  * [task]'s format ids may also be yt-dlp format selectors (`bv[ext=mp4][height<=720]`), as the
  * playlist downloads use: each entry picks its own formats.
@@ -42,6 +47,7 @@ class YtDlpDownloaderTask(
     private var process: Process? = null
 
     private val tempDir = File(task.tempDir)
+    private val infoJson = File(tempDir, INFO_JSON)
     private val totals = LongArray(task.formatIds.size) { -1 }
     private val downloaded = LongArray(task.formatIds.size)
     private var lastReport = 0L
@@ -159,9 +165,24 @@ class YtDlpDownloaderTask(
         data class Failed(val error: DownloadError) : Fetch
     }
 
-    /** Runs yt-dlp for one format, reporting its progress, and returns the file it wrote. */
+    /** Runs yt-dlp for one format; when the saved lookup is stale, once more from the page. */
     private fun fetch(tool: String, index: Int, formatId: String): Fetch {
-        val command = buildCommand(tool, index, formatId)
+        val fromInfo = hasFreshInfo()
+        val result = runOnce(buildCommand(tool, index, formatId), index, formatId)
+        if (result is Fetch.Failed && fromInfo && !stopFlag.get() && result.error != DownloadError.DiskSpaceError) {
+            Logger.info("XDM", "yt-dlp ${task.id}: saved lookup failed, reading the page again")
+            infoJson.delete()
+            return runOnce(buildCommand(tool, index, formatId), index, formatId)
+        }
+        return result
+    }
+
+    /** The saved lookup, if recent enough for its stream addresses to still work. */
+    private fun hasFreshInfo(): Boolean =
+        infoJson.length() > 0 && System.currentTimeMillis() - infoJson.lastModified() < INFO_MAX_AGE_MS
+
+    /** Runs one yt-dlp command, reporting its progress, and returns the file it wrote. */
+    private fun runOnce(command: List<String>, index: Int, formatId: String): Fetch {
         Logger.info("XDM", "yt-dlp ${task.id}: format $formatId")
         val proc = try {
             ProcessBuilder(command).redirectErrorStream(true).apply {
@@ -215,8 +236,15 @@ class YtDlpDownloaderTask(
         proxyUrl()?.let { cmd += listOf("--proxy", it) }
         task.cookie?.takeIf { it.isNotBlank() }?.let { cmd += listOf("--add-header", "Cookie:$it") }
         cmd += runCatching(extraArgs).getOrDefault(emptyList())
-        // "--" so a page address can never be read as an option.
-        cmd += listOf("--", task.pageUrl)
+        if (hasFreshInfo()) {
+            cmd += listOf("--load-info-json", infoJson.absolutePath)
+        } else {
+            // Keep this lookup for the next format and for resuming.
+            cmd += listOf("--write-info-json", "--no-write-playlist-metafiles",
+                "-o", "infojson:" + File(tempDir, INFO_JSON.removeSuffix(".info.json")).absolutePath)
+            // "--" so a page address can never be read as an option.
+            cmd += listOf("--", task.pageUrl)
+        }
         return cmd
     }
 
@@ -281,6 +309,10 @@ class YtDlpDownloaderTask(
 
     companion object {
         private const val PROGRESS = "BLAZMA-PROGRESS "
+
+        /** yt-dlp's page lookup (`-J` output) in the task's temp folder. */
+        const val INFO_JSON = "info.info.json"
+        private const val INFO_MAX_AGE_MS = 4L * 60 * 60 * 1000
         private const val FILE = "BLAZMA-FILE "
 
         /** Maps yt-dlp's last output lines to the closest download error. */

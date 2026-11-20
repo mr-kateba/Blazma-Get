@@ -17,6 +17,27 @@ export default class Connector {
         this.version = 0;
         this.polling = false;
         this.clientId = undefined;
+        this.waiters = [];
+    }
+
+    /**
+     * Resolves once it is known whether the app is running (or after [timeoutMs]). A download that
+     * wakes the browser's sleeping service worker arrives before the first reply from the app.
+     */
+    whenKnown(timeoutMs) {
+        if (this.connected !== undefined) {
+            return Promise.resolve();
+        }
+        return new Promise(resolve => {
+            this.waiters.push(resolve);
+            setTimeout(resolve, timeoutMs);
+        });
+    }
+
+    notifyWaiters() {
+        const waiters = this.waiters;
+        this.waiters = [];
+        waiters.forEach(w => w());
     }
 
     connect() {
@@ -45,6 +66,7 @@ export default class Connector {
         this.polling = false;
         this.connected = false;
         this.onDisconnect();
+        this.notifyWaiters();
     }
 
     isConnected() {
@@ -54,7 +76,10 @@ export default class Connector {
     onResponse(res) {
         this.connected = true;
         this.startLongPoll();
-        return res.json().then(json => this.applyMessage(json)).catch(err => this.disconnect());
+        return res.json()
+            .then(json => this.applyMessage(json))
+            .catch(err => this.disconnect())
+            .finally(() => this.notifyWaiters());
     }
 
     applyMessage(json) {

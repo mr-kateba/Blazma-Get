@@ -26,6 +26,7 @@ object YtDlpTool {
     private const val DENO_RELEASE = "https://github.com/denoland/deno/releases/latest/download/"
     private const val UPDATE_EVERY_MS = 24L * 60 * 60 * 1000
     private val lock = Any()
+    private val updating = java.util.concurrent.atomic.AtomicBoolean(false)
 
     private val os = System.getProperty("os.name").lowercase()
     private val arch = System.getProperty("os.arch").lowercase()
@@ -141,20 +142,49 @@ object YtDlpTool {
         }
     }
 
-    /** Runs yt-dlp's self-update when the last check is more than a day old. Never throws. */
+    /**
+     * Starts yt-dlp's self-update in the background when the last check is more than a day old.
+     * Nothing waits for it: a lookup or download never stalls behind a slow update. Never throws.
+     */
     fun updateIfStale() {
-        synchronized(lock) {
-            if (!isInstalled) return
-            val last = runCatching { stamp().readText().trim().toLong() }.getOrDefault(0L)
-            if (System.currentTimeMillis() - last < UPDATE_EVERY_MS) return
-            stamp().writeText(System.currentTimeMillis().toString())
-            runCatching {
-                val p = ProcessBuilder(listOf(executable.absolutePath, "-U") + proxyArgs())
-                    .redirectErrorStream(true).start()
-                val out = p.inputStream.bufferedReader().readText()
-                p.waitFor(2, TimeUnit.MINUTES)
-                Logger.info("XDM", "yt-dlp update: ${out.trim().lines().lastOrNull()}")
-            }.onFailure { Logger.error("XDM", "yt-dlp update failed", it) }
+        if (!isInstalled) return
+        val last = runCatching { stamp().readText().trim().toLong() }.getOrDefault(0L)
+        if (System.currentTimeMillis() - last < UPDATE_EVERY_MS) return
+        if (!updating.compareAndSet(false, true)) return
+        runCatching { stamp().writeText(System.currentTimeMillis().toString()) }
+        Thread({
+            try {
+                val (code, out) = runProcess(listOf(executable.absolutePath, "-U") + proxyArgs(), 2)
+                Logger.info("XDM", "yt-dlp update ($code): ${out.trim().lines().lastOrNull()}")
+            } catch (e: Exception) {
+                Logger.error("XDM", "yt-dlp update failed", e)
+            } finally {
+                updating.set(false)
+            }
+        }, "yt-dlp-update").apply { isDaemon = true }.start()
+    }
+
+    /**
+     * Runs [cmd] with its output in a file, so a process that hangs is stopped after [minutes]
+     * instead of blocking whoever reads its output. Returns (exit code, output); throws on timeout.
+     */
+    private fun runProcess(cmd: List<String>, minutes: Long, stderr: File? = null): Pair<Int, String> {
+        val outFile = File.createTempFile("yt-dlp", ".out")
+        try {
+            val p = ProcessBuilder(cmd).redirectOutput(outFile).apply {
+                if (stderr != null) redirectError(stderr) else redirectErrorStream(true)
+                environment()["PYTHONIOENCODING"] = "utf-8"
+                environment()["PYTHONUTF8"] = "1"
+            }.start()
+            p.outputStream.close()
+            if (!p.waitFor(minutes, TimeUnit.MINUTES)) {
+                runCatching { p.descendants().forEach { it.destroyForcibly() } }
+                p.destroyForcibly()
+                throw YtDlpException("timed out")
+            }
+            return p.exitValue() to outFile.readText(Charsets.UTF_8)
+        } finally {
+            outFile.delete()
         }
     }
 
@@ -169,7 +199,10 @@ object YtDlpTool {
     /** The qualities yt-dlp finds on [url]. Throws [IOException] (a [YtDlpException] with yt-dlp's reason). */
     fun fetchInfo(url: String): VideoInfo {
         val (out, err) = runJson(listOf("--no-playlist"), url)
-        return YtDlpFormats.parse(out, url).copy(jsRuntimeMissing = err.contains("JavaScript runtime", ignoreCase = true))
+        return YtDlpFormats.parse(out, url).copy(
+            jsRuntimeMissing = err.contains("JavaScript runtime", ignoreCase = true),
+            rawJson = out,
+        )
     }
 
     /** The videos of a playlist (titles and addresses only, which is fast even for long lists). */
@@ -182,17 +215,9 @@ object YtDlpTool {
         val errFile = File.createTempFile("yt-dlp", ".log")
         try {
             val cmd = listOf(exe, "--ignore-config", "-J", "--encoding", "utf-8") + options + commonArgs() + listOf("--", url)
-            val p = ProcessBuilder(cmd).redirectError(errFile).apply {
-                environment()["PYTHONIOENCODING"] = "utf-8"
-                environment()["PYTHONUTF8"] = "1"
-            }.start()
-            val out = p.inputStream.bufferedReader(Charsets.UTF_8).readText()
-            if (!p.waitFor(3, TimeUnit.MINUTES)) {
-                p.destroyForcibly()
-                throw YtDlpException("timed out")
-            }
+            val (code, out) = runProcess(cmd, 3, errFile)
             val err = errFile.readText(Charsets.UTF_8)
-            if (p.exitValue() != 0 || out.isBlank()) {
+            if (code != 0 || out.isBlank()) {
                 Logger.error("XDM", "yt-dlp -J failed for $url:\n$err")
                 throw YtDlpException(
                     err.lines().lastOrNull { it.startsWith("ERROR:") }?.removePrefix("ERROR:")?.trim()

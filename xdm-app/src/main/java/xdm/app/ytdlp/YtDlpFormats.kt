@@ -45,6 +45,8 @@ data class VideoInfo(
     val options: List<DownloadOption>,
     /** yt-dlp said it had no JavaScript runtime, so YouTube offered it fewer qualities. */
     val jsRuntimeMissing: Boolean = false,
+    /** yt-dlp's whole answer, handed to the download so it does not read the page again. */
+    val rawJson: String? = null,
 )
 
 /** One video of a playlist, as `yt-dlp --flat-playlist` lists it (no formats yet). */

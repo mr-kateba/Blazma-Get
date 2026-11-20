@@ -41,6 +41,17 @@ right-to-left UI and Blazma branding. Package names stay `xdm.*` so upstream cha
   format ids are yt-dlp selectors from `PlaylistPreset`. Without a JavaScript runtime YouTube offers
   fewer formats; `VideoInfo.jsRuntimeMissing` shows a banner that installs Deno into `<config>/tools`
   (`YtDlpTool.installDeno`, checksum-verified), passed to yt-dlp as `--js-runtimes deno:<path>`.
+  Reading a page is the slow part, so it happens once per download: the picker's `-J` answer is
+  written to `YtDlpDownloaderTask.INFO_JSON` in the task's temp folder (or the first run writes it
+  with `--write-info-json`) and every run starts from it with `--load-info-json`; a run that fails
+  from it (expired stream addresses) is retried from the page. `YtDlpTool` never blocks on the daily
+  `-U` update (background thread) and enforces its timeouts by reading output from files.
+- Default `maxParallelDownloads` is 4; configs from before 1.3.1 still on the old default of 1 are
+  raised once in `AppConfig.load` (a trailing flag marks configs that already went through it).
+- Extension (Chrome, MV3): the browser stops the service worker when idle, so state that must
+  survive lives in `chrome.storage` ("Catch downloads" switch), a download that wakes the worker
+  waits for the app's first reply (`Connector.whenKnown`), and the context menu is recreated with
+  `contextMenus.removeAll` instead of duplicated.
 - Quick speed-limit toggle in `AppToolBar`; Arabic strings in `resources/lang/ar.txt`.
 - Packaging: `packaging/windows/BlazmaGet.iss` (Inno Setup) and `.github/workflows/build.yml`.
   The installers ship a jlink runtime with only the modules in `packaging/build-bundle.{sh,ps1}`

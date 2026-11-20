@@ -36,8 +36,11 @@ interface IDownloadManager {
     fun addVideoDownload(videoId: Long, fileName: String, folder: String?, autoSelectFolder: Boolean)
     fun startHlsDownload(task: HlsDownloadTaskInfo)
     fun startDashDownload(task: DashDownloadTaskInfo)
-    /** [quiet]: one of many (a playlist), so no progress window and a notification, not a dialog, at the end. */
-    fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean = false)
+    /**
+     * [quiet]: one of many (a playlist), so no progress window and a notification, not a dialog, at the end.
+     * [infoJson]: yt-dlp's lookup of the page from the quality picker, so the download starts at once.
+     */
+    fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean = false, infoJson: String? = null)
     fun updateDownloadInfo(id: Long, task: HttpDownloadTaskInfo)
     fun getOriginPage(id: Long): String?
 }
@@ -868,10 +871,16 @@ class DownloadManager(
         enqueue(task.id, resume = false)
     }
 
-    override fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean) {
+    override fun startYtDlpDownload(task: YtDlpDownloadTaskInfo, quiet: Boolean, infoJson: String?) {
         val id = uniqueDownloadId(task.id)
         if (quiet) this.quiet += id
         val t = task.copy(id = id, tempDir = AppContext.config.tempFolder + File.separator + id)
+        if (!infoJson.isNullOrBlank()) {
+            runCatching {
+                File(t.tempDir).mkdirs()
+                File(t.tempDir, YtDlpDownloaderTask.INFO_JSON).writeText(infoJson, Charsets.UTF_8)
+            }.onFailure { Logger.error("XDM", "Unable to keep the video lookup for $id", it) }
+        }
         taskInfoDB.saveYtDlpTask(t)
         appDB.addActive(
             DbRecord(

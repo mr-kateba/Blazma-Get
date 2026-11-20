@@ -45,6 +45,11 @@ export default class App {
 
     start() {
         this.logger.log("starting...");
+        // The "Catch downloads" switch survives the browser putting this worker to sleep.
+        chrome.storage.local.get("userDisabled", r => {
+            this.userDisabled = !!(r && r.userDisabled);
+            this.updateActionIcon();
+        });
         this.starAppConnector();
         this.register();
         this.logger.log("started.");
@@ -91,6 +96,19 @@ export default class App {
 
     onDeterminingFilename(download, suggest) {
         this.logger.log("onDeterminingFilename");
+        if (this.connector.isConnected() === undefined) {
+            // This download woke the worker: wait for the app's first reply instead of letting
+            // the browser keep a download the app should have caught.
+            this.connector.whenKnown(2500).then(() => {
+                this.decideDownload(download);
+                try { suggest(); } catch (e) { }
+            });
+            return true;
+        }
+        this.decideDownload(download);
+    }
+
+    decideDownload(download) {
         if (!this.isMonitoringEnabled()) {
             return;
         }
@@ -310,6 +328,7 @@ export default class App {
         }
         else if (request.type === "cmd") {
             this.userDisabled = request.enabled === false;
+            chrome.storage.local.set({ userDisabled: this.userDisabled });
             this.logger.log("request.enabled:" + request.enabled);
             if (request.enabled && !this.connector.isConnected()) {
                 this.connector.launchApp();
@@ -374,6 +393,12 @@ export default class App {
     }
 
     attachContextMenu() {
+        // The browser keeps the menu when it restarts this worker: recreate it, never duplicate it.
+        chrome.contextMenus.removeAll(() => this.createContextMenu());
+        chrome.contextMenus.onClicked.addListener(this.onMenuClicked.bind(this));
+    }
+
+    createContextMenu() {
         chrome.contextMenus.create({
             id: 'download-any-link',
             title: this.menuTitle("link"),
@@ -385,8 +410,6 @@ export default class App {
             title: this.menuTitle("image"),
             contexts: ["image"]
         });
-
-        chrome.contextMenus.onClicked.addListener(this.onMenuClicked.bind(this));
     }
 
     onTabActivated(activeInfo) {

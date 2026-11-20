@@ -38,16 +38,27 @@ class TestYtDlpDownloader {
         if (::work.isInitialized) work.deleteRecursively()
     }
 
-    /** A fake yt-dlp: writes `data-<format>` to the -o template ("a*" formats are m4a). */
+    private val calls get() = File(work, "calls.log").takeIf { it.isFile }?.readLines() ?: emptyList()
+
+    /**
+     * A fake yt-dlp: writes `data-<format>` to the -o template ("a*" formats are m4a), writes the
+     * page lookup for --write-info-json, and logs each call ("page" or "info") to calls.log.
+     */
     private fun fakeTool(body: String = ""): String {
         val script = File(work, "yt-dlp")
         script.writeText(
             """
             #!/bin/bash
-            out=""; fmt=""
+            out=""; fmt=""; info=""; from=page
             while [ ${'$'}# -gt 0 ]; do
-              case "${'$'}1" in -o) out="${'$'}2"; shift;; -f) fmt="${'$'}2"; shift;; esac; shift
+              case "${'$'}1" in
+                -o) case "${'$'}2" in infojson:*) info="${'$'}{2#infojson:}.info.json";; *) out="${'$'}2";; esac; shift;;
+                -f) fmt="${'$'}2"; shift;;
+                --load-info-json) from=info; shift;;
+              esac; shift
             done
+            echo "${'$'}from ${'$'}fmt" >> "${'$'}(dirname "${'$'}0")/calls.log"
+            [ -n "${'$'}info" ] && echo '{"formats":[]}' > "${'$'}info"
             ext=mp4; [[ "${'$'}fmt" == a* ]] && ext=m4a
             file="${'$'}{out/\%(ext)s/${'$'}ext}"
             $body
@@ -111,6 +122,32 @@ class TestYtDlpDownloader {
         assertTrue(muxer.merged!!.second.endsWith("part-1.m4a"))
         assertEquals("data-137+data-a140", host.finalFile!!.readText())
         assertFalse("temp folder left behind", tmp.exists())
+        // The page is read once; the audio starts from the saved lookup.
+        assertEquals(listOf("page 137", "info a140"), calls)
+    }
+
+    @Test
+    fun lookupFromThePicker_isUsedForEveryFormat() {
+        val host = host()
+        File(tmp, YtDlpDownloaderTask.INFO_JSON).writeText("{\"formats\":[]}")
+        YtDlpDownloaderTask(task(listOf("137", "a140")), host, { fakeTool() }, StubMuxer(), TestConfig(1)).start()
+
+        assertTrue(host.latch.await(20, TimeUnit.SECONDS))
+        assertNull(host.failure)
+        assertEquals(listOf("info 137", "info a140"), calls)
+    }
+
+    @Test
+    fun staleLookup_isRetriedFromThePage() {
+        val host = host()
+        File(tmp, YtDlpDownloaderTask.INFO_JSON).writeText("{\"formats\":[]}")
+        // Stream addresses in the saved lookup have expired: only a run from the page works.
+        val tool = fakeTool("[ \"${'$'}from\" = info ] && { echo 'ERROR: HTTP Error 403: Forbidden'; exit 1; }")
+        YtDlpDownloaderTask(task(listOf("a140"), "m4a"), host, { tool }, StubMuxer(), TestConfig(1)).start()
+
+        assertTrue(host.latch.await(20, TimeUnit.SECONDS))
+        assertNull("the retry from the page should have worked", host.failure)
+        assertEquals(listOf("info a140", "page a140"), calls)
     }
 
     @Test
@@ -183,10 +220,10 @@ class TestYtDlpDownloader {
             task(listOf("bv[ext=mp4][height<=720]/bv[ext=mp4]", "ba[ext=m4a]")), host(), { "yt-dlp" }, StubMuxer(),
             TestConfig(1), extraArgs = { listOf("--js-runtimes", "deno:/tools/deno") }
         ).buildCommand("yt-dlp", 0, "bv[ext=mp4][height<=720]/bv[ext=mp4]")
-        assertEquals(
-            listOf("--js-runtimes", "deno:/tools/deno", "--", "https://www.youtube.com/watch?v=x"),
-            cmd.takeLast(4)
-        )
+        val runtime = cmd.indexOf("--js-runtimes")
+        assertEquals("deno:/tools/deno", cmd[runtime + 1])
+        assertTrue("options must come before the page", runtime < cmd.indexOf("--"))
+        assertEquals(listOf("--", "https://www.youtube.com/watch?v=x"), cmd.takeLast(2))
         assertEquals("bv[ext=mp4][height<=720]/bv[ext=mp4]", cmd[cmd.indexOf("-f") + 1])
         // A failing option source never stops the download.
         val safe = YtDlpDownloaderTask(task(listOf("18")), host(), { "yt-dlp" }, StubMuxer(), TestConfig(1)) {

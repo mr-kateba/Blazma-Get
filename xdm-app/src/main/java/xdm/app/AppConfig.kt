@@ -106,7 +106,7 @@ class AppConfig(private val configDir: String) : IAppConfig {
     override var minVideoSize: Long = 1024
     override var lang: String = "en"
     override var theme: String = "dark"
-    override var maxParallelDownloads: Int = 1
+    override var maxParallelDownloads: Int = 4
     override var downloadCompleteNotification: DownloadCompleteNotification = DownloadCompleteNotification.DIALOG
     override var showDownloadCompleteWindow: Boolean
         // No backing field: the old boolean is just a projection of the three-way mode, so a
@@ -232,6 +232,7 @@ class AppConfig(private val configDir: String) : IAppConfig {
         out.writeInt(downloadCompleteNotification.ordinal)
         out.writeBoolean(autoResumeOnReconnect)
         out.writeBoolean(monitorClipboard)
+        out.writeBoolean(true) // parallel downloads default already raised (see load)
     }
 
     private fun load(input: DataInputStream) {
@@ -320,7 +321,12 @@ class AppConfig(private val configDir: String) : IAppConfig {
             .onSuccess { downloadCompleteNotification = it }
             .onFailure { return }
         runCatching { input.readBoolean() }.onSuccess { autoResumeOnReconnect = it }.onFailure { return }
-        runCatching { input.readBoolean() }.onSuccess { monitorClipboard = it }
+        runCatching { input.readBoolean() }.onSuccess { monitorClipboard = it }.onFailure { return }
+        // Builds before 1.3.1 defaulted to one download at a time, so a second download sat
+        // "waiting" until the first ended. Raise that old default once; a value the user picked
+        // after this build stays as it is.
+        val raised = runCatching { input.readBoolean() }.getOrDefault(false)
+        if (!raised && maxParallelDownloads == 1) maxParallelDownloads = 4
     }
 
     private fun writeCategories(out: DataOutputStream, list: List<DownloadCategory>) {

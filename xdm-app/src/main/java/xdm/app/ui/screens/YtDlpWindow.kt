@@ -507,7 +507,8 @@ class YtDlpWindow(private val pageUrl: String, pageTitle: String?) : JDialog() {
                 formatIds = option.formatIds,
                 outputExt = option.ext,
                 expectedSize = option.size,
-            )
+            ),
+            infoJson = video.rawJson,
         )
         dispose()
     }

@@ -123,6 +123,11 @@ export default class RequestWatcher {
                     chrome.tabs.get(
                         req.tabId,
                         tab => {
+                            // The tab may have closed meanwhile.
+                            if (chrome.runtime.lastError || !tab) {
+                                this.callback(this.createRequestData(req, res, null, null, req.tabId));
+                                return;
+                            }
                             this.callback(this.createRequestData(req, res, tab.title, tab.url, req.tabId));
                         }
                     );
