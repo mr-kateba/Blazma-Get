@@ -38,8 +38,8 @@ data class DownloadCategory(
     val displayName: String
         get() {
             if (defaultNameOf(id) != name) return name
-            val translated: String? = I8N.text(id)
-            return if (translated.isNullOrBlank()) name else translated
+            val translated = I8N.text(id)
+            return if (translated.isBlank() || translated == id) name else translated
         }
 
     fun matches(fileName: String): Boolean =

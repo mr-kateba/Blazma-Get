@@ -10,9 +10,10 @@ object I8N {
     private val properties = Properties()
 
     // each file must have name like de.deutsch.german.txt
+    /** The text for [id]; a missing one shows its id instead of crashing the window that asked. */
     @Synchronized
     fun text(id: String): String {
-        return properties.getProperty(id)
+        return properties.getProperty(id) ?: id
     }
 
     fun loadTexts(code: String): Boolean {
